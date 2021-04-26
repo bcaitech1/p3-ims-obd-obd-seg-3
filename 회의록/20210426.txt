@@ -1,0 +1,22 @@
+
+추가 사용할 수 있는 데이터셋
+TACO dataset: http://tacodataset.org/
+COCO dataset: https://cocodataset.org/#home
+
+공지사항의 segmentation_models https://github.com/qubvel/segmentation_models.pytorch
+동빈님이 올려주신 글: https://towardsdatascience.com/image-segmentation-in-2020-756b77fa88fc
+Unet++
+DeepLabV3+
+gatedscnn
+
+segmentation in paperwithcode: https://paperswithcode.com/task/semantic-segmentation
+
+Loss
+https://towardsdatascience.com/image-segmentation-in-2020-756b77fa88fc
+Focal Loss
+Dice loss
+Intersection over Union (IoU)-balanced Loss
+Boundary loss
+Weighted cross-entropy
+Lovász-Softmax loss
+
