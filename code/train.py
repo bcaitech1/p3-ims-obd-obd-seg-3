@@ -19,8 +19,6 @@ from utils import label_accuracy_score, seed_everything
 from loss import create_criterion
 from dataset import get_classname
 
-from dataset import load_category_names
-
 from tqdm.auto import tqdm
 import time
 
@@ -95,7 +93,7 @@ def train(data_dir, model_dir, args):
 
     transform_module = getattr(import_module("dataset"), args.dataset)  # default: BaseAugmentation
 
-    category_names = load_category_names()
+    category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
     # train dataset
     train_dataset = transform_module(data_dir=train_path, category_names=category_names, mode='train', transform=train_transform)
 
