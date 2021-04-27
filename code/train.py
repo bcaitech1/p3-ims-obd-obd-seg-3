@@ -15,7 +15,7 @@ from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from utils import label_accuracy_score
+from utils import label_accuracy_score, seed_everything
 from loss import create_criterion
 from dataset import get_classname
 
@@ -23,15 +23,6 @@ from dataset import load_category_names
 
 from tqdm.auto import tqdm
 import time
-
-def seed_everything(seed):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)  # if use multi-GPU
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-    np.random.seed(seed)
-    random.seed(seed)
 
 
 def get_lr(optimizer):

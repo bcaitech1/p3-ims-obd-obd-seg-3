@@ -1,5 +1,7 @@
 # https://github.com/wkentaro/pytorch-fcn/blob/master/torchfcn/utils.py
 import numpy as np
+import torch
+import random
 
 
 def _fast_hist(label_true, label_pred, n_class):
@@ -32,3 +34,12 @@ def label_accuracy_score(label_trues, label_preds, n_class):
     freq = hist.sum(axis=1) / hist.sum()
     fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
     return acc, acc_cls, mean_iu, fwavacc
+
+def seed_everything(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    np.random.seed(seed)
+    random.seed(seed)
