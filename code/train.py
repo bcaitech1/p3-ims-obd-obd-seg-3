@@ -63,11 +63,9 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-        A.Resize(256, 256),
         ToTensorV2()
         ])
     val_transform = A.Compose([
-        A.Resize(256, 256),
         ToTensorV2()
         ])
 
@@ -265,7 +263,7 @@ if __name__ == '__main__':
     model_dir = args.model_dir
 
 
-    args.model = 'DeepLap_v3_plus_efficientnet_b5'
-    args.name = "Deep_v3_eff_b5_resize256_"
+    args.model = 'DeepLapV3PlusEfficientnetB5'
+    args.name = "Deep_v3_eff_b5_resize512_"
 
     train(data_dir, model_dir, args)
