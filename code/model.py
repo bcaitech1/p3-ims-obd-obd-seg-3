@@ -31,21 +31,21 @@ class FCN8s(nn.Module):
         # Score
         self.score_fr = nn.Conv2d(4096, num_classes, kernel_size = 1)
         
-        # UpScore2 using deconv      여기서 7 x 7을 kernel 4에 stride 2에 padding을 1로 하니깐 14 x 14이 됨  (여기서 패딩은 잘라주는 역할)
+        # UpScore2 using deconv      여기서 16 x 16을 kernel 4에 stride 2에 padding을 1로 하니깐 32 x 32이 됨  (여기서 패딩은 잘라주는 역할)
         self.upscore2 = nn.ConvTranspose2d(num_classes,
                                            num_classes,
                                            kernel_size=4,
                                            stride=2,
                                            padding=1)
         
-        # UpScore2_pool4 using deconv     여기서 14 x 14을 kernel 4에 stride 2에 padding 1로 하니깐 28 x 28이 됨
+        # UpScore2_pool4 using deconv     여기서 32 x 32을 kernel 4에 stride 2에 padding 1로 하니깐 64 x 64이 됨
         self.upscore2_pool4 = nn.ConvTranspose2d(num_classes, 
                                                  num_classes, 
                                                  kernel_size=4,
                                                  stride=2,
                                                  padding=1)
         
-        # UpScore8 using deconv          여기서 28 * 28을 kernel 16에 stride 8에 padding 4로 하니깐 224 x 224가 됨
+        # UpScore8 using deconv          여기서 64 * 64을 kernel 16에 stride 8에 padding 4로 하니깐 512 x 512가 됨
         self.upscore8 = nn.ConvTranspose2d(num_classes, 
                                            num_classes,
                                            kernel_size=16,
@@ -67,15 +67,15 @@ class FCN8s(nn.Module):
         upscore2 = self.upscore2(h)
         
         # Sum I
-        h = upscore2 + score_pool4c
+        h = upscore2 + score_pool4c    # 32 x 32
         
         # Up Score II
         upscore2_pool4c = self.upscore2_pool4(h)
         
         # Sum II
-        h = upscore2_pool4c + score_pool3c
+        h = upscore2_pool4c + score_pool3c   # 64 x 64
         
         # Up Score III
-        upscore8 = self.upscore8(h)
+        upscore8 = self.upscore8(h)     # 512 x 512
         
         return upscore8

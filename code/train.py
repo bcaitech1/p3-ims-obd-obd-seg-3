@@ -75,12 +75,10 @@ def train(data_dir, model_dir, args):
     # val_transform = transform_module
 
     train_transform = A.Compose([
-            A.Resize(256, 256),
             ToTensorV2()
             ])
 
     val_transform = A.Compose([
-            A.Resize(256, 256),
             ToTensorV2()
             ])
 
