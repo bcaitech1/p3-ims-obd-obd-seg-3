@@ -2,7 +2,7 @@
 /model/*/*.pth
 ./input/*
 ./code/saved/
-./code/submission
+./code/submission/
 /.vscode/
 /.idea/*
 /code/EDA_GJ.ipynb

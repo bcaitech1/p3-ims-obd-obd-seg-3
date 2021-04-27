@@ -63,11 +63,13 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-            ToTensorV2()
-            ])
+        A.Resize(256, 256),
+        ToTensorV2()
+        ])
     val_transform = A.Compose([
-            ToTensorV2()
-            ])
+        A.Resize(256, 256),
+        ToTensorV2()
+        ])
 
     # create own Dataset 1 (skip)
     # validation set을 직접 나누고 싶은 경우
@@ -95,7 +97,7 @@ def train(data_dir, model_dir, args):
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
-                                            num_workers=4,
+                                            num_workers=1,
                                             collate_fn=collate_fn)
 
     # -- model
@@ -192,7 +194,7 @@ def train(data_dir, model_dir, args):
             val_mIoU = np.mean(mIoU_list)
             
             if val_mIoU > best_val_mIoU:
-                print(f"New best model for val f1 : {val_mIoU:4.2%}! saving the best model..")
+                print(f"New best model for val mIoU : {val_mIoU:4.2%}! saving the best model..")
                 torch.save(model.module.state_dict(), f"{save_dir}/best.pth")
                 best_val_mIoU = val_mIoU
             # torch.save(model.module.state_dict(), f"{save_dir}/last.pth")
