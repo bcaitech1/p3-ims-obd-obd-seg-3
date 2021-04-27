@@ -48,10 +48,7 @@ def increment_path(path, exist_ok=False):
 
 def train(data_dir, model_dir, args):
     seed_everything(args.seed)
-
     save_dir = increment_path(os.path.join(model_dir, args.name))
-
-    # -- settings
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
@@ -63,25 +60,16 @@ def train(data_dir, model_dir, args):
     def collate_fn(batch):
         return tuple(zip(*batch))
 
-
-    # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함 
-
-    # transform_module = getattr(import_module("dataset"), args.augmentation)  # default: BaseAugmentation
-
+    # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
-    # train_transform = transform_module
-    # val_transform = transform_module
-
     train_transform = A.Compose([
             A.Resize(256, 256),
             ToTensorV2()
             ])
-
     val_transform = A.Compose([
             A.Resize(256, 256),
             ToTensorV2()
             ])
-
 
     # create own Dataset 1 (skip)
     # validation set을 직접 나누고 싶은 경우
@@ -92,18 +80,11 @@ def train(data_dir, model_dir, args):
     # train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
     # create own Dataset 2
-
     transform_module = getattr(import_module("dataset"), args.dataset)  # default: BaseAugmentation
-
     category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
-    # train dataset
     train_dataset = transform_module(data_dir=train_path, category_names=category_names, mode='train', transform=train_transform)
-
-    # validation dataset
     val_dataset = transform_module(data_dir=val_path, category_names=category_names, mode='val', transform=val_transform)
-
     num_classes = train_dataset.num_classes  # 12
-
 
     # DataLoader
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
@@ -111,7 +92,6 @@ def train(data_dir, model_dir, args):
                                             shuffle=True,
                                             num_workers=4,
                                             collate_fn=collate_fn)
-
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
@@ -144,9 +124,7 @@ def train(data_dir, model_dir, args):
     best_val_mIoU = 0
     best_val_loss = np.inf
     for epoch in range(args.epochs):
-        # train loop
         model.train()
-
         train_loss = 0
         train_cnt = 0
         train_mIoU_list = []
@@ -154,11 +132,9 @@ def train(data_dir, model_dir, args):
             images, masks, _ = train_batch
             images = torch.stack(images)        # (batch, channel, height, width)
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
-
             images, masks = images.to(device), masks.to(device)
 
             outputs = model(images)
-            
             loss = criterion(outputs, masks)
             optimizer.zero_grad()
             loss.backward()
