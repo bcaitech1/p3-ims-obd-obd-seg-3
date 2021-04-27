@@ -75,10 +75,12 @@ def train(data_dir, model_dir, args):
     # val_transform = transform_module
 
     train_transform = A.Compose([
+            A.Resize(256, 256),
             ToTensorV2()
             ])
 
     val_transform = A.Compose([
+            A.Resize(256, 256),
             ToTensorV2()
             ])
 
@@ -109,13 +111,13 @@ def train(data_dir, model_dir, args):
     train_loader = torch.utils.data.DataLoader(dataset=train_dataset, 
                                             batch_size=args.batch_size,
                                             shuffle=True,
-                                            num_workers=1,
+                                            num_workers=4,
                                             collate_fn=collate_fn)
 
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
-                                            num_workers=1,
+                                            num_workers=4,
                                             collate_fn=collate_fn)
 
     # -- model
@@ -127,7 +129,7 @@ def train(data_dir, model_dir, args):
 
     # -- loss & metric
     criterion = create_criterion(args.criterion)  # default: cross_entropy
-    opt_module = getattr(import_module("torch.optim"), args.optimizer)  # default: SGD
+    opt_module = getattr(import_module("torch.optim"), args.optimizer)  # default: Adam
     optimizer = opt_module(
         filter(lambda p: p.requires_grad, model.parameters()),
         lr=args.lr,
@@ -239,13 +241,13 @@ if __name__ == '__main__':
 
     # Data and model checkpoints directories
     parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
-    parser.add_argument('--epochs', type=int, default=10, help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=20, help='number of epochs to train (default: 1)')
     parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: MaskBaseDataset)')
     parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
 
     # Resize도 현재는 적용안되어 있음 (원본 size 크니깐 resize 필요해보임) Crop은 조심. 
     # parser.add_argument("--resize", nargs="+", type=list, default=[128, 96], help='resize size for image when training')
-    parser.add_argument('--batch_size', type=int, default=16, help='input batch size for training (default: 64)')
+    parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training (default: 64)')
     parser.add_argument('--valid_batch_size', type=int, default=16, help='input batch size for validing (default: 1000)')
     parser.add_argument('--model', type=str, default='FCN8s', help='model type (default: BaseModel)')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer type (default: SGD)')
@@ -269,7 +271,6 @@ if __name__ == '__main__':
 
 
 ### 남은 pipline 수정사항 ####
-### data_dir 수정 필요  (개인에 맞게)
 ### scheduler 지금 비활성화 (필요시 param확인후 사용)
 ### Validation set 나누는것 customize 필요
 ### loss 정의 필요   (예전 데이터 기준으로 되어있어서, Cross entropy 말고는 다시 점검해야함)
@@ -289,5 +290,9 @@ if __name__ == '__main__':
 
     data_dir = args.data_dir
     model_dir = args.model_dir
+
+
+    args.model = 'DeepLap_v3_plus_efficientnet_b5'
+    args.name = "Deep_v3_eff_b5_resize256_"
 
     train(data_dir, model_dir, args)

@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torchvision import models
 from torchvision.models import vgg16
+import segmentation_models_pytorch as smp
 
 class FCN8s(nn.Module):
     def __init__(self, num_classes):
@@ -79,3 +80,85 @@ class FCN8s(nn.Module):
         upscore8 = self.upscore8(h)     # 512 x 512
         
         return upscore8
+
+# model_module = getattr(import_module("model"), args.model)
+
+# ENCODER = 'efficientnet-b5'
+# ENCODER_WEIGHTS = 'imagenet'
+# #ACTIVATION = 'softmax2d'
+# # DEVICE = 'cuda'
+# model = smp.DeepLabV3Plus(
+#     encoder_name=ENCODER, 
+#     encoder_weights=ENCODER_WEIGHTS, 
+#     classes=12, 
+# )
+# # preprocessing_fn = smp.encoders.get_preprocessing_fn(ENCODER, ENCODER_WEIGHTS)
+# # model = model.to(device)
+
+# Custom Model Template
+class DeepLap_v3_plus_efficientnet_b5(nn.Module):
+
+    ENCODER = 'efficientnet-b5'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=DeepLap_v3_plus_efficientnet_b5.ENCODER, 
+            encoder_weights=DeepLap_v3_plus_efficientnet_b5.ENCODER_WEIGHTS, 
+            classes=12,
+            )
+
+    def forward(self, x):
+        return self.model(x) 
+
+
+class DeepLap_v3_plus_resnext50(nn.Module):
+
+    ENCODER = 'se_resnext50_32x4d'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=DeepLap_v3_plus_resnext50.ENCODER, 
+            encoder_weights=DeepLap_v3_plus_resnext50.ENCODER_WEIGHTS, 
+            classes=12,
+            )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class DeepLap_v3_plus_resnext101(nn.Module):
+
+    ENCODER = 'se_resnext101_32x4d'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=DeepLap_v3_plus_resnext101.ENCODER, 
+            encoder_weights=DeepLap_v3_plus_resnext101.ENCODER_WEIGHTS, 
+            classes=12,
+            )
+
+    def forward(self, x):
+        return self.model(x) 
+
+
+class DeepLap_v3_plus_efficientnet_b5_noisy_student(nn.Module):
+
+    ENCODER = 'timm-efficientnet-b5'
+    ENCODER_WEIGHTS = 'noisy-student'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=DeepLap_v3_plus_efficientnet_b5_noisy_student.ENCODER, 
+            encoder_weights=DeepLap_v3_plus_efficientnet_b5_noisy_student.ENCODER_WEIGHTS, 
+            classes=12,
+            )
+
+    def forward(self, x):
+        return self.model(x) 
