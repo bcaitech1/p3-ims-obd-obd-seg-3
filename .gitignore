@@ -5,3 +5,5 @@
 ./code/submission
 /.vscode/
 /.idea/*
+/code/EDA_GJ.ipynb
+/code/FCN8s baseline.ipynb
