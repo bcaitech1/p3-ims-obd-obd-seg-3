@@ -75,12 +75,10 @@ def train(data_dir, model_dir, args):
     # val_transform = transform_module
 
     train_transform = A.Compose([
-            A.Resize(256, 256),
             ToTensorV2()
             ])
 
     val_transform = A.Compose([
-            A.Resize(256, 256),
             ToTensorV2()
             ])
 
@@ -112,7 +110,8 @@ def train(data_dir, model_dir, args):
                                             batch_size=args.batch_size,
                                             shuffle=True,
                                             num_workers=4,
-                                            collate_fn=collate_fn)
+                                            collate_fn=collate_fn,
+                                            drop_last=True)
 
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
@@ -152,8 +151,7 @@ def train(data_dir, model_dir, args):
         train_loss = 0
         train_cnt = 0
         train_mIoU_list = []
-        for idx, train_batch in enumerate(train_loader):
-            images, masks, _ = train_batch
+        for idx, (images, masks, _) in enumerate(train_loader):
             images = torch.stack(images)        # (batch, channel, height, width)
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
 
@@ -197,9 +195,7 @@ def train(data_dir, model_dir, args):
             total_loss = 0
             cnt = 0
             mIoU_list = []
-            for val_batch in val_loader:
-                
-                images, masks, _ = val_batch
+            for (images, masks, _) in val_loader:
                 images = torch.stack(images)        # (batch, channel, height, width)
                 masks = torch.stack(masks).long()   # (batch, channel, height, width)
 
