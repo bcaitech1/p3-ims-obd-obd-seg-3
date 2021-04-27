@@ -163,3 +163,67 @@ class DeepLapV3PlusEfficientnetB5NoisyStudent(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+
+
+class DeepLapV3PlusInceptionresnetv2(nn.Module):
+    ENCODER = 'inceptionresnetv2'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class DeepLapV3PlusInceptionresnetv2Background(nn.Module):
+    ENCODER = 'inceptionresnetv2'
+    ENCODER_WEIGHTS = 'imagenet+background'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class DeepLapV3PlusInceptionv4(nn.Module):
+    ENCODER = 'inceptionv4'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class DeepLapV3PlusInceptionv4Background(nn.Module):
+    ENCODER = 'inceptionv4'
+    ENCODER_WEIGHTS = 'imagenet+background'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
