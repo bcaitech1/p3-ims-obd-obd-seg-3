@@ -96,7 +96,7 @@ def inference(data_dir, model_dir, output_dir, args):
 
 def make_submission(data_dir, model_dir, output_dir, args):
     # sample_submisson.csv 열기
-    submission = pd.read_csv('/opt/ml/p3-ims-obd-obd-seg-3/submission/sample_submission.csv', index_col=None)
+    submission = pd.read_csv('/opt/ml/code/submission/sample_submission.csv', index_col=None)
 
     # test set에 대한 prediction
     file_names, preds = inference(data_dir, model_dir, output_dir, args)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     # Data and model checkpoints directories
     parser.add_argument('--batch_size', type=int, default=32, help='input batch size for validing (default: 512)')
     # parser.add_argument('--resize', type=tuple, default=(96, 128), help='resize size for image when you trained (default: (96, 128))')
-    parser.add_argument('--model', type=str, default='FCN8s', help='model type (default: FCN8s)')
+    parser.add_argument('--model', type=str, default='DeepLapV3PlusEfficientnetB5NoisyStudent', help='model type (default: FCN8s)')
 
     parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: CustomDataset)')
 
@@ -131,8 +131,8 @@ if __name__ == '__main__':
 
     # Container environment
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_EVAL', '/opt/ml/input/data'))
-    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_CHANNEL_MODEL', '/opt/ml/p3-ims-obd-obd-seg-3/model/Deep_v3_eff_b5_resize256_'))
-    parser.add_argument('--output_dir', type=str, default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/p3-ims-obd-obd-seg-3/submission'))
+    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_CHANNEL_MODEL', '/opt/ml/model/DeepLapV3PlusEfficientnetB5NoisyStudent'))
+    parser.add_argument('--output_dir', type=str, default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/code/submission'))
 
     args = parser.parse_args()
 
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     model_dir = args.model_dir
     output_dir = args.output_dir
 
-    args.model = 'DeepLap_v3_plus_efficientnet_b5'
+    args.model = 'DeepLapV3PlusEfficientnetB5NoisyStudent'
 
     os.makedirs(output_dir, exist_ok=True)
 

@@ -7,4 +7,12 @@
 /.idea/*
 /code/EDA_GJ.ipynb
 /code/FCN8s baseline.ipynb
+/code/FCN16s baseline.ipynb
+/code/FCN32s baseline.ipynb
+/code/DeconvNet baseline.ipynb
+/code/DeepLabv1 baseline.ipynb
+/code/DeepLabv2 baseline(VGG16).ipynb
+/code/DeepLabv3 baseline(VGG16).ipynb
+/code/DilatedNet baseline.ipynb
+/code/SegNet baseline.ipynb
 /code/__pycache__
