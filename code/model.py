@@ -85,21 +85,6 @@ class FCN8s(nn.Module):
 
         return upscore8
 
-
-# model_module = getattr(import_module("model"), args.model)
-
-# ENCODER = 'efficientnet-b5'
-# ENCODER_WEIGHTS = 'imagenet'
-# #ACTIVATION = 'softmax2d'
-# # DEVICE = 'cuda'
-# model = smp.DeepLabV3Plus(
-#     encoder_name=ENCODER, 
-#     encoder_weights=ENCODER_WEIGHTS, 
-#     classes=12, 
-# )
-# # preprocessing_fn = smp.encoders.get_preprocessing_fn(ENCODER, ENCODER_WEIGHTS)
-# # model = model.to(device)
-
 # Custom Model Template
 class DeepLapV3PlusEfficientnetB5(nn.Module):
     ENCODER = 'efficientnet-b5'
@@ -171,10 +156,17 @@ class DeepLapV3PlusInceptionresnetv2(nn.Module):
 
     def __init__(self, num_classes):
         super().__init__()
-        self.model = smp.DeepLabV3Plus(
+        # aux_params=dict(
+        #     pooling='avg',             # one of 'avg', 'max'
+        #     dropout=0.5,               # dropout ratio, default is None
+        #     activation='sigmoid',      # activation function, default is None
+        #     classes=12,                 # define number of output labels
+        # )
+        self.model = smp.UnetPlusPlus(
             encoder_name=self.ENCODER,
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
+            # aux_params=aux_params,
         )
 
     def forward(self, x):
@@ -187,10 +179,17 @@ class DeepLapV3PlusInceptionresnetv2Background(nn.Module):
 
     def __init__(self, num_classes):
         super().__init__()
-        self.model = smp.DeepLabV3Plus(
+        # aux_params=dict(
+        #     pooling='avg',             # one of 'avg', 'max'
+        #     dropout=0.5,               # dropout ratio, default is None
+        #     activation='sigmoid',      # activation function, default is None
+        #     classes=12,                 # define number of output labels
+        # )
+        self.model = smp.UnetPlusPlus(
             encoder_name=self.ENCODER,
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
+            # aux_params=aux_params,
         )
 
     def forward(self, x):
@@ -203,10 +202,17 @@ class DeepLapV3PlusInceptionv4(nn.Module):
 
     def __init__(self, num_classes):
         super().__init__()
-        self.model = smp.DeepLabV3Plus(
+        # aux_params=dict(
+        #     pooling='avg',             # one of 'avg', 'max'
+        #     dropout=0.5,               # dropout ratio, default is None
+        #     activation='sigmoid',      # activation function, default is None
+        #     classes=12,                 # define number of output labels
+        # )
+        self.model = smp.UnetPlusPlus(
             encoder_name=self.ENCODER,
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
+            # aux_params=aux_params,
         )
 
     def forward(self, x):
@@ -219,10 +225,17 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
 
     def __init__(self, num_classes):
         super().__init__()
-        self.model = smp.DeepLabV3Plus(
+        # aux_params=dict(
+        #     pooling='avg',             # one of 'avg', 'max'
+        #     dropout=0.5,               # dropout ratio, default is None
+        #     activation='sigmoid',      # activation function, default is None
+        #     classes=12,                 # define number of output labels
+        # )
+        self.model = smp.UnetPlusPlus(
             encoder_name=self.ENCODER,
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
+            # aux_params=aux_params,
         )
 
     def forward(self, x):

@@ -263,7 +263,7 @@ if __name__ == '__main__':
     model_dir = args.model_dir
 
 
-    args.model = 'DeepLapV3PlusEfficientnetB5'
-    args.name = "Deep_v3_eff_b5_resize512_"
+    args.model = 'DeepLapV3PlusInceptionresnetv2Background'
+    args.name = "Deep_v3_Inc_v2_background_"
 
     train(data_dir, model_dir, args)
