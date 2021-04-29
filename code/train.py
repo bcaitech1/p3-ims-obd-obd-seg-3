@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from utils import label_accuracy_score, seed_everything
+from utils import label_accuracy_score, seed_everything, seed_worker
 from loss import create_criterion
 
 import time
@@ -43,7 +43,7 @@ def increment_path(path, exist_ok=False):
 
 
 def train(data_dir, model_dir, args):
-    seed_everything(args.seed)
+    
     save_dir = increment_path(os.path.join(model_dir, args.name))
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
@@ -86,13 +86,15 @@ def train(data_dir, model_dir, args):
                                             shuffle=True,
                                             num_workers=4,
                                             collate_fn=collate_fn,
-                                            drop_last=True)
+                                            drop_last=True,
+                                            worker_init_fn=seed_worker)
 
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
                                             num_workers=1,
-                                            collate_fn=collate_fn)
+                                            collate_fn=collate_fn,
+                                            worker_init_fn=seed_worker)
 
     # -- model
     model_module = getattr(import_module("model"), args.model)  # default: BaseModel
@@ -129,8 +131,12 @@ def train(data_dir, model_dir, args):
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
             images, masks = images.to(device), masks.to(device)
 
-            outputs = model(images)
-            loss = criterion(outputs, masks)
+            if args.model = "GSCNN":
+                outputs = model(images)
+                loss = criterion(outputs, masks)
+            else:
+                outputs = model(images)
+                loss = criterion(outputs, masks)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -235,6 +241,8 @@ if __name__ == '__main__':
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
 
     args = parser.parse_args()
+
+    seed_everything(args.seed)
 
 
 ### 남은 pipline 수정사항 ####
