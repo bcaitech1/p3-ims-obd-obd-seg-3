@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from pycocotools.coco import COCO
 import numpy as np
 
 import cv2 as cv
@@ -62,6 +63,25 @@ class FocalLoss2(nn.Module):
         loss = -1 * (1-pt)**self.gamma * logpt
         if self.size_average: return loss.mean()
         else: return loss.sum()
+def get_classes_count():
+    annotation = "../input/data/train_all.json"
+
+
+
+class WeightedCrossEntropy(nn.Module):
+    def __init__(self):
+        super(WeightedCrossEntropy, self).__init__()
+        weights = None
+        classes_count = None  # 클래스 별 카운트
+        if classes_count is not None:
+            weights = torch.tensor(classes_count)
+            weights = weights / weights.sum()
+            weights = 1.0 / weights
+            weights = weights / weights.sum()
+        self.CrossEntropyLoss = nn.CrossEntropyLoss(weight=weights)
+
+    def forward(self, inputs, target):
+        return self.CrossEntropyLoss(inputs, target)
 
 
 class softCrossEntropy(nn.Module):
@@ -78,8 +98,9 @@ class softCrossEntropy(nn.Module):
         log_likelihood = - F.log_softmax(inputs, dim=1)
         sample_num, class_num = target.shape
         multiple = torch.mul(log_likelihood, target)
-        loss = torch.sum(multiple)/sample_num
+        loss = torch.sum(multiple) / sample_num
         return loss
+
 
 class focal_softCrossEntropy(nn.Module):
     def __init__(self, weight=None,
@@ -100,8 +121,9 @@ class focal_softCrossEntropy(nn.Module):
         prob_focal = ((1 - prob) ** self.gamma) * log_prob
 
         multiple = torch.mul(log_prob, target)
-        loss = torch.sum(multiple)/sample_num
+        loss = torch.sum(multiple) / sample_num
         return loss
+
 
 class LabelSmoothingLoss(nn.Module):
     def __init__(self, classes=18, smoothing=0.0, dim=-1):
@@ -126,6 +148,7 @@ class F1Loss(nn.Module):
         super().__init__()
         self.classes = classes
         self.epsilon = epsilon
+
     def forward(self, y_pred, y_true):
         assert y_pred.ndim == 2
         assert y_true.ndim == 1
@@ -268,7 +291,10 @@ _criterion_entrypoints = {
     'focal_softCE' : focal_softCrossEntropy,
     'focal2': FocalLoss2,
     'HausdorffDT' : HausdorffDTLoss,
+    'soft_cross_entropy': softCrossEntropy,
+    'focal_softCE': focal_softCrossEntropy
 }
+
 
 def create_criterion(criterion_name, **kwargs):
     if is_criterion(criterion_name):
@@ -277,6 +303,7 @@ def create_criterion(criterion_name, **kwargs):
     else:
         raise RuntimeError('Unknown loss (%s)' % criterion_name)
     return criterion
+
 
 def criterion_entrypoint(criterion_name):
     return _criterion_entrypoints[criterion_name]
