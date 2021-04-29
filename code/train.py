@@ -131,7 +131,7 @@ def train(data_dir, model_dir, args):
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
             images, masks = images.to(device), masks.to(device)
 
-            if args.model = "GSCNN":
+            if args.model == "GSCNN":
                 outputs = model(images)
                 loss = criterion(outputs, masks)
             else:
