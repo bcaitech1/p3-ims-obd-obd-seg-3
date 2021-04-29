@@ -15,4 +15,4 @@
 /code/DeepLabv3 baseline(VGG16).ipynb
 /code/DilatedNet baseline.ipynb
 /code/SegNet baseline.ipynb
-/code/__pycache__
+/code/__pycache__/*
