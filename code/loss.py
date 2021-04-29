@@ -26,20 +26,32 @@ class FocalLoss(nn.Module):
 
 
 def get_classes_count():
-    annotation = "../input/data/train_all.json"
-
+    # 모든 사진들로부터 background를 제외한 클래스별 픽셀 카운트를 구합니다.
+    coco = COCO("../input/data/train_all.json")
+    annotations = coco.loadAnns(coco.getAnnIds())
+    class_num = len(coco.getCatIds())
+    classes_count = [0] * class_num
+    for annotation in annotations:
+        class_id = annotation["category_id"]
+        pixel_count = np.sum(coco.annToMask(annotation))
+        classes_count[class_id] += pixel_count
+    # background의 픽셀 카운트를 계산합니다.
+    image_num = len(coco.getImgIds())
+    total_pixel_count = image_num * 512 * 512
+    background_pixel_count = total_pixel_count - sum(classes_count)
+    # 모든 클래스별 픽셀 카운트를 구합니다.
+    nclasses_count = [background_pixel_count] + classes_count
+    return nclasses_count
 
 
 class WeightedCrossEntropy(nn.Module):
     def __init__(self):
         super(WeightedCrossEntropy, self).__init__()
-        weights = None
-        classes_count = None  # 클래스 별 카운트
-        if classes_count is not None:
-            weights = torch.tensor(classes_count)
-            weights = weights / weights.sum()
-            weights = 1.0 / weights
-            weights = weights / weights.sum()
+        classes_count = get_classes_count()  # 클래스 별 카운트
+        weights = torch.tensor(classes_count)
+        weights = weights / weights.sum()
+        weights = 1.0 / weights
+        weights = weights / weights.sum()
         self.CrossEntropyLoss = nn.CrossEntropyLoss(weight=weights)
 
     def forward(self, inputs, target):
