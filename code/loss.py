@@ -3,6 +3,18 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 
+import cv2 as cv
+import numpy as np
+
+import torch
+
+from scipy.ndimage.morphology import distance_transform_edt as edt
+from scipy.ndimage import convolve
+
+from torch.autograd import Variable
+
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
 
 # https://discuss.pytorch.org/t/is-this-a-correct-implementation-for-focal-loss-in-pytorch/43327/8
 class FocalLoss(nn.Module):
@@ -22,6 +34,35 @@ class FocalLoss(nn.Module):
             weight=self.weight,
             reduction=self.reduction
         )
+
+
+class FocalLoss2(nn.Module):
+    def __init__(self, gamma=0, alpha=None, size_average=True):
+        super(FocalLoss2, self).__init__()
+        self.gamma = gamma
+        self.alpha = alpha
+        if isinstance(alpha,(float,int)): self.alpha = torch.Tensor([alpha,1-alpha])
+        if isinstance(alpha,list): self.alpha = torch.Tensor(alpha)
+        self.size_average = size_average
+    def forward(self, input, target):
+        if input.dim()>2:
+            input = input.view(input.size(0),input.size(1),-1)  # N,C,H,W => N,C,H*W
+            input = input.transpose(1,2)    # N,C,H*W => N,H*W,C
+            input = input.contiguous().view(-1,input.size(2))   # N,H*W,C => N*H*W,C
+        target = target.view(-1,1)
+        logpt = F.log_softmax(input)
+        logpt = logpt.gather(1,target)
+        logpt = logpt.view(-1)
+        pt = Variable(logpt.data.exp())
+        if self.alpha is not None:
+            if self.alpha.type()!=input.data.type():
+                self.alpha = self.alpha.type_as(input.data)
+            at = self.alpha.gather(0,target.data.view(-1))
+            logpt = logpt * Variable(at)
+        loss = -1 * (1-pt)**self.gamma * logpt
+        if self.size_average: return loss.mean()
+        else: return loss.sum()
+
 
 class softCrossEntropy(nn.Module):
     def __init__(self):
@@ -103,13 +144,130 @@ class F1Loss(nn.Module):
         f1 = f1.clamp(min=self.epsilon, max=1 - self.epsilon)
         return 1 - f1.mean()
 
+
+def make_one_hot(labels, C=12):
+    '''
+    Converts an integer label torch.autograd.Variable to a one-hot Variable.
+    
+    Parameters
+    ----------
+    labels : torch.autograd.Variable of torch.cuda.LongTensor
+        N x 1 x H x W, where N is batch size. 
+        Each value is an integer representing correct classification.
+    C : integer. 
+        number of classes in labels.
+    
+    Returns
+    -------
+    target : torch.autograd.Variable of torch.cuda.FloatTensor
+        N x C x H x W, where C is class number. One-hot encoded.
+    '''
+    labels.to(device)
+    one_hot = torch.FloatTensor(labels.size(0), C, labels.size(2), labels.size(3)).zero_().to(device)
+    target = one_hot.scatter_(1, labels.data.to(device), 1)
+    
+    target = Variable(target)
+        
+    return target
+
+
+"""
+Hausdorff loss implementation based on paper:
+https://arxiv.org/pdf/1904.10030.pdf
+copy pasted from - all credit goes to original authors:
+https://github.com/SilmarilBearer/HausdorffLoss
+"""
+
+
+class HausdorffDTLoss(nn.Module):
+    """Binary Hausdorff loss based on distance transform"""
+
+    def __init__(self, alpha=2.0, **kwargs):
+        super(HausdorffDTLoss, self).__init__()
+        self.alpha = alpha
+
+    @torch.no_grad()
+    def distance_field(self, img: np.ndarray) -> np.ndarray:
+        field = np.zeros_like(img)
+
+        for batch in range(len(img)):
+            fg_mask = img[batch] > 0.5
+
+            if fg_mask.any():
+                bg_mask = ~fg_mask
+
+                fg_dist = edt(fg_mask)
+                bg_dist = edt(bg_mask)
+
+                field[batch] = fg_dist + bg_dist
+
+        return field
+
+    def forward(
+        self, pred: torch.Tensor, target: torch.Tensor, debug=False
+    ) -> torch.Tensor:
+        """
+        Uses one binary channel: 1 - fg, 0 - bg
+        pred: (b, 1, x, y, z) or (b, 1, x, y)
+        target: (b, 1, x, y, z) or (b, 1, x, y)
+        """
+        pred_ = torch.clone(pred)
+        target_ = torch.clone(target)
+        m = nn.Softmax(dim=1)
+        pred_all = m(pred)
+        target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
+        target_all = make_one_hot(target)
+
+        loss_sum = 0
+
+        for c in range(12):  # for class
+            pred = pred_all[:, c, :, :]
+            target = target_all[:, c, :, :]
+
+            # assert pred.dim() == 4 or pred.dim() == 5, "Only 2D and 3D supported"
+            # assert (
+            #     pred.dim() == target.dim()
+            # ), "Prediction and target need to be of same dimension"
+
+            # pred = torch.sigmoid(pred)
+
+            pred_dt = torch.from_numpy(self.distance_field(pred.detach().cpu().numpy())).float()
+            target_dt = torch.from_numpy(self.distance_field(target.detach().cpu().numpy())).float()
+
+            pred_error = (pred - target) ** 2
+            distance = pred_dt ** self.alpha + target_dt ** self.alpha
+
+            dt_field = pred_error.to(device) * distance.to(device)
+            loss = dt_field.mean()
+
+            if debug:
+                loss_sum += (
+                    loss.cpu().numpy(),
+                    (
+                        dt_field.cpu().numpy()[0, 0],
+                        pred_error.cpu().numpy()[0, 0],
+                        distance.cpu().numpy()[0, 0],
+                        pred_dt.cpu().numpy()[0, 0],
+                        target_dt.cpu().numpy()[0, 0],
+                    ),
+                )
+
+            else:
+                loss_sum += loss
+        ce_loss_f = nn.CrossEntropyLoss()
+        ce_loss = ce_loss_f(pred_, target_)
+        return loss_sum / 12 / pred_all.shape[0]/3 + ce_loss
+
+
 _criterion_entrypoints = {
     'cross_entropy': nn.CrossEntropyLoss,
     'focal': FocalLoss,
     'label_smoothing': LabelSmoothingLoss,
     'f1': F1Loss,
     'soft_cross_entropy' : softCrossEntropy,
-    'focal_softCE' : focal_softCrossEntropy
+    'focal_softCE' : focal_softCrossEntropy,
+    'focal2': FocalLoss2,
+    'HausdorffDT' : HausdorffDTLoss,
 }
 
 def create_criterion(criterion_name, **kwargs):

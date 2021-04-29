@@ -265,5 +265,6 @@ if __name__ == '__main__':
 
     args.model = 'DeepLapV3PlusInceptionresnetv2Background'
     args.name = "Deep_v3_Inc_v2_background_"
+    args.criterion = 'HausdorffDT'
 
     train(data_dir, model_dir, args)
