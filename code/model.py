@@ -134,9 +134,9 @@ class DeepLapV3PlusResnext101(nn.Module):
         return self.model(x)
 
 
-class DeepLapV3PlusEfficientnetB5Advprop(nn.Module):
+class DeepLapV3PlusEfficientnetB5NoisyStudent(nn.Module):
     ENCODER = 'timm-efficientnet-b5'
-    ENCODER_WEIGHTS = 'advprop'
+    ENCODER_WEIGHTS = 'noisy-student'
 
     def __init__(self, num_classes):
         super().__init__()
@@ -150,9 +150,10 @@ class DeepLapV3PlusEfficientnetB5Advprop(nn.Module):
         return self.model(x)
 
 
-class DeepLapV3PlusEfficientnetB5NoisyStudent(nn.Module):
-    ENCODER = 'timm-efficientnet-b5'
-    ENCODER_WEIGHTS = 'noisy-student'
+
+class ResNet34(nn.Module):
+    ENCODER = 'resnet34'
+    ENCODER_WEIGHTS = 'imagenet'
 
     def __init__(self, num_classes):
         super().__init__()
