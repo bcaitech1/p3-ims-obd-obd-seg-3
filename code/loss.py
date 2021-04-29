@@ -52,6 +52,8 @@ class WeightedCrossEntropy(nn.Module):
         weights = weights / weights.sum()
         weights = 1.0 / weights
         weights = weights / weights.sum()
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        weights = weights.to(device)
         self.CrossEntropyLoss = nn.CrossEntropyLoss(weight=weights)
 
     def forward(self, inputs, target):
