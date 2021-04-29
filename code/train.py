@@ -2,24 +2,20 @@ import argparse
 import glob
 import json
 import os
-import random
 import re
 from importlib import import_module
 from pathlib import Path
 
 import numpy as np
 import torch
-from torch.optim.lr_scheduler import StepLR
-from torch.utils.data import Subset, DataLoader
+from torch.utils.data import Subset
 from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 from utils import label_accuracy_score, seed_everything
 from loss import create_criterion
-from dataset import get_classname
 
-from tqdm.auto import tqdm
 import time
 
 
@@ -263,7 +259,7 @@ if __name__ == '__main__':
     model_dir = args.model_dir
 
 
-    args.model = 'DeepLapV3PlusInceptionresnetv2Background'
-    args.name = "Deep_v3_Inc_v2_background_"
+    args.model = 'DeepLapV3PlusResnext101'
+    args.name = "DeepLapV3PlusResnext101-epoch20"
 
     train(data_dir, model_dir, args)
