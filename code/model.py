@@ -149,6 +149,51 @@ class DeepLapV3PlusEfficientnetB5NoisyStudent(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+class DeepLapV3PlusEfficientnetB0Imagenet(nn.Module):
+    ENCODER = 'timm-efficientnet-b0'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+class DeepLapV3PlusEfficientnetB0Advprop(nn.Module):
+    ENCODER = 'timm-efficientnet-b0'
+    ENCODER_WEIGHTS = 'advprop'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+class DeepLapV3PlusEfficientnetB0NoisyStudent(nn.Module):
+    ENCODER = 'timm-efficientnet-b0'
+    ENCODER_WEIGHTS = 'noisy-student'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
 
 
 class ResNet34(nn.Module):
