@@ -229,7 +229,7 @@ def train(data_dir, model_dir, args):
                 f"[Val] mIoU : {val_mIoU:4.2%}, loss: {val_loss:4.4} || "
                 f"best mIoU : {best_val_mIoU:4.2%}, best loss: {best_val_loss:4.4}"
             )
-            train_info['epoch'] = epoch + 1
+            train_info['epoch'] = epoch
             with open(os.path.join(save_dir, 'train_info.json'), 'w') as fp:
                 json.dump(train_info, fp)
             torch.save(model.module.state_dict(), f"{save_dir}/latest.pth")
