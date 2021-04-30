@@ -18,6 +18,7 @@ from loss import create_criterion
 
 import time
 from utils import load_model
+import pickle
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
@@ -124,7 +125,11 @@ def train(data_dir, model_dir, args):
 
     # -- logging
     start_time = time.time()
-    logger = SummaryWriter(log_dir=save_dir)
+    if os.path.exists(os.path.join(save_dir, 'logger')):
+        with open(os.path.join(save_dir, 'logger'), 'rb') as f:
+            logger = pickle.load(f)
+    else:
+        logger = SummaryWriter(log_dir=save_dir)
 
     with open(os.path.join(save_dir, 'config.json'), 'w', encoding='utf-8') as f:
         json.dump(vars(args), f, ensure_ascii=False, indent=4)
@@ -133,7 +138,7 @@ def train(data_dir, model_dir, args):
         with open(os.path.join(save_dir, 'train_info.json'), 'r') as fp:
             train_info = json.load(fp)
     else:
-        train_info = {'best_val_mIoU': 0,
+        train_info = {'best_val_mIOU': 0,
                       'epoch': -1,
                       }
     start_epoch = train_info['epoch'] + 1
@@ -229,6 +234,8 @@ def train(data_dir, model_dir, args):
             torch.save(model.module.state_dict(), f"{save_dir}/latest.pth")
             logger.add_scalar("Val/loss", val_loss, epoch)
             logger.add_scalar("Val/mIoU", val_mIoU, epoch)
+            with open(os.path.join(save_dir, 'logger'), 'wb') as f:
+                pickle.dump(logger, f)
             s = f'Time elapsed: {(time.time() - start_time)/60: .2f} min'
             print(s)
             print()
