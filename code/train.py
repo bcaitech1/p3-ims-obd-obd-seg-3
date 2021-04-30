@@ -18,7 +18,7 @@ from loss import create_criterion
 
 import time
 from utils import load_model
-# import pickle
+import pickle
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
@@ -60,8 +60,12 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-        ToTensorV2()
-        ])
+        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+        A.HorizontalFlip(p=0.5),
+        A.Resize(512, 512),
+        ToTensorV2(),
+    ])
+
     val_transform = A.Compose([
         ToTensorV2()
         ])
@@ -113,6 +117,10 @@ def train(data_dir, model_dir, args):
             model = load_model(model_dir, num_classes, device, args, 'best.pth').to(device)
         model = torch.nn.DataParallel(model)
         save_dir = os.path.join(model_dir, args.name)
+
+    with open(os.path.join(save_dir, 'transform'), 'w') as f:
+        f.write(str(train_transform) + '\n\n' + str(val_transform))
+
     # -- loss & metric
     criterion = create_criterion(args.criterion)  # default: cross_entropy
     opt_module = getattr(import_module("torch.optim"), args.optimizer)  # default: Adam
@@ -260,7 +268,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate (default: 1e-3)')
 
     ## 이거 수정해서 validation 나누는 기준 수정 필요
-    parser.add_argument('--val_ratio', type=float, default=0.2, help='ratio for validaton (default: 0.2)')  
+    parser.add_argument('--val_ratio', type=float, default=0.2, help='ratio for validaton (default: 0.2)')
 
     parser.add_argument('--criterion', type=str, default='cross_entropy', help='criterion type (default: cross_entropy)')
 
