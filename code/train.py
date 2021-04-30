@@ -18,7 +18,6 @@ from loss import create_criterion
 
 import time
 from utils import load_model
-import pickle
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
@@ -60,9 +59,6 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
-        A.HorizontalFlip(p=0.5),
-        A.Resize(512, 512),
         ToTensorV2(),
     ])
 
@@ -134,11 +130,6 @@ def train(data_dir, model_dir, args):
     # -- logging
     start_time = time.time()
     logger = SummaryWriter(log_dir=save_dir)
-    # if os.path.exists(os.path.join(save_dir, 'logger')):
-    #     with open(os.path.join(save_dir, 'logger'), 'rb') as f:
-    #         logger = pickle.load(f)
-    # else:
-    #     logger = SummaryWriter(log_dir=save_dir)
 
     with open(os.path.join(save_dir, 'config.json'), 'w', encoding='utf-8') as f:
         json.dump(vars(args), f, ensure_ascii=False, indent=4)
@@ -243,8 +234,6 @@ def train(data_dir, model_dir, args):
             torch.save(model.module.state_dict(), f"{save_dir}/latest.pth")
             logger.add_scalar("Val/loss", val_loss, epoch)
             logger.add_scalar("Val/mIoU", val_mIoU, epoch)
-            # with open(os.path.join(save_dir, 'logger'), 'wb') as f:
-            #     pickle.dump(logger, f)
             s = f'Time elapsed: {(time.time() - start_time)/60: .2f} min'
             print(s)
             print()
