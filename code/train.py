@@ -11,6 +11,7 @@ import torch
 from torch.utils.data import Subset
 from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
+from torchvision import datasets, models, transforms
 from albumentations.pytorch import ToTensorV2
 
 from utils import label_accuracy_score, seed_everything, seed_worker
@@ -49,23 +50,33 @@ def train(data_dir, model_dir, args):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # train.json / validation.json / test.json 디렉토리 설정
-    train_path = data_dir + '/train.json'
-    val_path = data_dir + '/val.json'
+    train_path = './input/data/train.json'
+    val_path = './input/data/val.json'
 
     # collate_fn needs for batch
     def collate_fn(batch):
         return tuple(zip(*batch))
 
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
-    # # validation 다른 aug 적용하려면 datset.py 수정 필요
+    #  validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
+<<<<<<< Updated upstream
         ToTensorV2(),
     ])
+=======
+        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+        A.RandomGridShuffle(grid=(1, 2), always_apply=False, p=0.4),
+        A.HorizontalFlip(p=0.5),
+        A.Resize(512,512),
+        ToTensorV2(),
+        ])
+>>>>>>> Stashed changes
 
     val_transform = A.Compose([
         ToTensorV2()
-        ])
-
+    ])
+    
+    
     # create own Dataset 1 (skip)
     # validation set을 직접 나누고 싶은 경우
     # random_split 사용하여 data set을 8:2 로 분할
@@ -244,7 +255,7 @@ if __name__ == '__main__':
 
     # Data and model checkpoints directories
     parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
-    parser.add_argument('--epochs', type=int, default=20, help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=40, help='number of epochs to train (default: 1)')
     parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: MaskBaseDataset)')
     parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
 
@@ -252,7 +263,8 @@ if __name__ == '__main__':
     # parser.add_argument("--resize", nargs="+", type=list, default=[128, 96], help='resize size for image when training')
     parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training (default: 64)')
     parser.add_argument('--valid_batch_size', type=int, default=16, help='input batch size for validing (default: 1000)')
-    parser.add_argument('--model', type=str, default='FCN8s', help='model type (default: BaseModel)')
+#     parser.add_argument('--model', type=str, default='FCN8s', help='model type (default: BaseModel)')
+    parser.add_argument('--model', type=str, default='DeepLapV3PlusResnext50', help='model type (default: BaseModel)')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer type (default: SGD)')
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate (default: 1e-3)')
 
@@ -267,7 +279,7 @@ if __name__ == '__main__':
     parser.add_argument('--name', default='exp', help='model save at {SM_MODEL_DIR}/{name}')
 
     # Container environment
-    parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml/input/data'))
+    parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/input/data'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
     parser.add_argument('--load_model', type=bool, default=False)
 
@@ -285,7 +297,7 @@ if __name__ == '__main__':
 ### inference.py는 만들어야함!!
 
 ### 설치 필요사항  ####
-### pip install tensorboard
+###  
 ### apt-get update
 ### apt-get install -y libsm6 libxext6 libxrender-dev
 ### pip install opencv-python
@@ -294,10 +306,19 @@ if __name__ == '__main__':
 ###### step1 : terminal에서 tensorboard --logdir='p3-ims-obd-obd-seg-3/model' --bind_all  입력
 ###### step2 : 각자 aistages 서버탭에 있는 tensorboard 주소로 접속
 
+#     data_dir = args.data_dir
+#     model_dir = args.model_dir
     data_dir = args.data_dir
     model_dir = args.model_dir
 
     # args.model = 'DeepLapV3PlusResnext101'
     # args.name = "DeepLapV3PlusResnext101-epoch20"
 
+<<<<<<< Updated upstream
     train(data_dir, model_dir, args)
+=======
+    args.model = 'DeepLapV3PlusEfficientnetB5NoisyStudent'
+    args.name = "AUGM3_DeepLapV3PlusEfficientnetB5NoisyStudent"
+    
+    train(data_dir, model_dir, args)
+>>>>>>> Stashed changes

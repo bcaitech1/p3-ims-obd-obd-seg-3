@@ -82,7 +82,7 @@ def inference(data_dir, model_dir, output_dir, args):
 
 def make_submission(data_dir, model_dir, output_dir, args):
     # sample_submisson.csv 열기
-    submission = pd.read_csv('/opt/ml/code/submission/sample_submission.csv', index_col=None)
+    submission = pd.read_csv('./code/submission/sample_submission.csv', index_col=None)
 
     # test set에 대한 prediction
     file_names, preds = inference(data_dir, model_dir, output_dir, args)
@@ -116,9 +116,9 @@ if __name__ == '__main__':
     parser.add_argument('--name', type=str, default='submission', help='submission file name (default: submission)')
 
     # Container environment
-    parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_EVAL', '/opt/ml/input/data'))
-    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_CHANNEL_MODEL', '/opt/ml/model/DeepLapV3PlusEfficientnetB5NoisyStudent'))
-    parser.add_argument('--output_dir', type=str, default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/code/submission'))
+    parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_EVAL', './input/data'))
+    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_CHANNEL_MODEL', './model/AUGM_DeepLapV3PlusEfficientnetB5NoisyStudent2'))
+    parser.add_argument('--output_dir', type=str, default=os.environ.get('SM_OUTPUT_DATA_DIR', './code/NoisyStudentSubmission'))
 
     args = parser.parse_args()
 

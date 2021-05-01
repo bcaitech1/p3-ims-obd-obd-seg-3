@@ -22,7 +22,7 @@ def get_classname(classID, cats):
 class BaseAugmentation:
     def __init__(self):
         self.transform = A.Compose([
-            A.Resize(256, 256),
+            A.Resize(512, 512),
             ToTensorV2()
             ])
 
@@ -49,7 +49,7 @@ class CustomDataset(Dataset):
         image_infos = self.coco.loadImgs(image_id)[0]
         
         # cv2 를 활용하여 image 불러오기
-        images = cv2.imread(os.path.join(dataset_path, image_infos['file_name']))
+        images = cv2.imread(os.path.join('./input/data', image_infos['file_name']))
         images = cv2.cvtColor(images, cv2.COLOR_BGR2RGB).astype(np.float32)
         images /= 255.0
         
