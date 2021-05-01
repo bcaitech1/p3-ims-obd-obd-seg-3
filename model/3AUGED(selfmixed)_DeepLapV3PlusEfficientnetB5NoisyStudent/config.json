@@ -1,0 +1,18 @@
+{
+    "seed": 42,
+    "epochs": 40,
+    "dataset": "CustomDataset",
+    "augmentation": "BaseAugmentation",
+    "batch_size": 8,
+    "valid_batch_size": 16,
+    "model": "DeepLapV3PlusEfficientnetB5NoisyStudent",
+    "optimizer": "Adam",
+    "lr": 0.0001,
+    "val_ratio": 0.2,
+    "criterion": "cross_entropy",
+    "lr_decay_step": 20,
+    "log_interval": 20,
+    "name": "AUGM3_DeepLapV3PlusEfficientnetB5NoisyStudent",
+    "data_dir": "/input/data",
+    "model_dir": "../model"
+}
