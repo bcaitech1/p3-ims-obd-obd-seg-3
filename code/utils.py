@@ -52,7 +52,7 @@ def seed_worker(_worker_id):
     np.random.seed(worker_seed)
     random.seed(worker_seed)
 
-def load_model(model_dir, num_classes, device, args, file_name='best.pth'):
+def load_model(model_dir, num_classes, device, args, mode='train', file_name='best.pth'):
     model_cls = getattr(import_module("model"), args.model)
     model = model_cls(
         num_classes=num_classes
@@ -61,8 +61,10 @@ def load_model(model_dir, num_classes, device, args, file_name='best.pth'):
     # tarpath = os.path.join(saved_model, 'best.tar.gz')
     # tar = tarfile.open(tarpath, 'r:gz')
     # tar.extractall(path=saved_model)
-
-    model_path = os.path.join(model_dir, args.name, file_name)
+    if mode == 'train':
+        model_path = os.path.join(model_dir, args.name, file_name)
+    elif mode == 'inference':
+        model_path = os.path.join(model_dir, file_name)
     model.load_state_dict(torch.load(model_path, map_location=device))
 
     return model
