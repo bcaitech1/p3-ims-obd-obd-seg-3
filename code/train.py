@@ -59,9 +59,11 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
+        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+        A.HorizontalFlip(p=0.5),
+        A.Resize(512, 512),
         ToTensorV2(),
     ])
-
     val_transform = A.Compose([
         ToTensorV2()
         ])
