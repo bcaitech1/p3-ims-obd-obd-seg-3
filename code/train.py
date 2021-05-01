@@ -17,7 +17,7 @@ from utils import label_accuracy_score, seed_everything, seed_worker
 from loss import create_criterion
 
 import time
-
+from utils import load_model
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:
@@ -59,8 +59,8 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-        ToTensorV2()
-        ])
+        ToTensorV2(),
+    ])
     val_transform = A.Compose([
         ToTensorV2()
         ])
@@ -97,11 +97,25 @@ def train(data_dir, model_dir, args):
                                             worker_init_fn=seed_worker)
 
     # -- model
-    model_module = getattr(import_module("model"), args.model)  # default: BaseModel
-    model = model_module(
-        num_classes=num_classes
-    ).to(device)
-    model = torch.nn.DataParallel(model)
+    if args.load_model == False:
+        model_module = getattr(import_module("model"), args.model)  # default: BaseModel
+        model = model_module(
+            num_classes=num_classes
+        ).to(device)
+        model = torch.nn.DataParallel(model)
+    else:
+        if os.path.exists(os.path.join(model_dir, args.name, 'latest.pth')):
+            print(f'start loading model from {os.path.join(args.name, "latest.pth")}...')
+            model = load_model(model_dir, num_classes, device, args, 'train', 'latest.pth').to(device)
+        else:
+            print(f'start loading model from {os.path.join(args.name, "best.pth")}...')
+            model = load_model(model_dir, num_classes, device, args, 'train', 'best.pth').to(device)
+        model = torch.nn.DataParallel(model)
+        save_dir = os.path.join(model_dir, args.name)
+    if not os.path.exists(save_dir):
+        os.mkdir(save_dir)
+    with open(os.path.join(save_dir, 'transform'), 'w') as f:
+        f.write(str(train_transform) + '\n\n' + str(val_transform))
 
     # -- loss & metric
     criterion = create_criterion(args.criterion)  # default: cross_entropy
@@ -116,12 +130,23 @@ def train(data_dir, model_dir, args):
     # -- logging
     start_time = time.time()
     logger = SummaryWriter(log_dir=save_dir)
+
     with open(os.path.join(save_dir, 'config.json'), 'w', encoding='utf-8') as f:
         json.dump(vars(args), f, ensure_ascii=False, indent=4)
 
-    best_val_mIoU = 0
+    if os.path.exists(os.path.join(save_dir, 'train_info.json')):
+        with open(os.path.join(save_dir, 'train_info.json'), 'r') as fp:
+            train_info = json.load(fp)
+    else:
+        train_info = {'best_val_mIOU': 0,
+                      'epoch': -1,
+                      }
+    start_epoch = train_info['epoch'] + 1
+    best_val_mIoU = train_info['best_val_mIOU']
+    print(f'best_val_mIOU: {best_val_mIoU}')
+    print(f'start_epoch: {start_epoch}')
     best_val_loss = np.inf
-    for epoch in range(args.epochs):
+    for epoch in range(start_epoch, start_epoch + args.epochs):
         model.train()
         train_loss = 0
         train_cnt = 0
@@ -131,7 +156,7 @@ def train(data_dir, model_dir, args):
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
             images, masks = images.to(device), masks.to(device)
 
-            if args.model = "GSCNN":
+            if args.model == "GSCNN":
                 outputs = model(images)
                 loss = criterion(outputs, masks)
             else:
@@ -152,7 +177,7 @@ def train(data_dir, model_dir, args):
                 train_loss = train_loss / train_cnt
                 current_lr = get_lr(optimizer)
                 print(
-                    f"Epoch[{epoch}/{args.epochs}]({idx + 1}/{len(train_loader)}) || "
+                    f"Epoch[{epoch+1}/{start_epoch + args.epochs}]({idx + 1}/{len(train_loader)}) || "
                     f"training loss {train_loss:4.4} || training mIoU {np.mean(train_mIoU_list):4.2%} || lr {current_lr}"
                 )
                 logger.add_scalar("Train/loss", train_loss, epoch * len(train_loader) + idx)
@@ -197,11 +222,16 @@ def train(data_dir, model_dir, args):
                 print(f"New best model for val mIoU : {val_mIoU:4.2%}! saving the best model..")
                 torch.save(model.module.state_dict(), f"{save_dir}/best.pth")
                 best_val_mIoU = val_mIoU
+                train_info['best_val_mIOU'] = best_val_mIoU
             # torch.save(model.module.state_dict(), f"{save_dir}/last.pth")
             print(
                 f"[Val] mIoU : {val_mIoU:4.2%}, loss: {val_loss:4.4} || "
                 f"best mIoU : {best_val_mIoU:4.2%}, best loss: {best_val_loss:4.4}"
             )
+            train_info['epoch'] = epoch
+            with open(os.path.join(save_dir, 'train_info.json'), 'w') as fp:
+                json.dump(train_info, fp)
+            torch.save(model.module.state_dict(), f"{save_dir}/latest.pth")
             logger.add_scalar("Val/loss", val_loss, epoch)
             logger.add_scalar("Val/mIoU", val_mIoU, epoch)
             s = f'Time elapsed: {(time.time() - start_time)/60: .2f} min'
@@ -227,7 +257,7 @@ if __name__ == '__main__':
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate (default: 1e-3)')
 
     ## 이거 수정해서 validation 나누는 기준 수정 필요
-    parser.add_argument('--val_ratio', type=float, default=0.2, help='ratio for validaton (default: 0.2)')  
+    parser.add_argument('--val_ratio', type=float, default=0.2, help='ratio for validaton (default: 0.2)')
 
     parser.add_argument('--criterion', type=str, default='cross_entropy', help='criterion type (default: cross_entropy)')
 
@@ -239,6 +269,7 @@ if __name__ == '__main__':
     # Container environment
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml/input/data'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
+    parser.add_argument('--load_model', type=bool, default=False)
 
     args = parser.parse_args()
 
@@ -266,7 +297,7 @@ if __name__ == '__main__':
     data_dir = args.data_dir
     model_dir = args.model_dir
 
-    args.model = 'DeepLapV3PlusResnext101'
-    args.name = "DeepLapV3PlusResnext101-epoch20"
+    # args.model = 'DeepLapV3PlusResnext101'
+    # args.name = "DeepLapV3PlusResnext101-epoch20"
 
     train(data_dir, model_dir, args)

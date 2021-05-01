@@ -12,22 +12,8 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 from tqdm.auto import tqdm
+from utils import load_model
 
-
-def load_model(model_dir, num_classes, device):
-    model_cls = getattr(import_module("model"), args.model)
-    model = model_cls(
-        num_classes=num_classes
-    )
-
-    # tarpath = os.path.join(saved_model, 'best.tar.gz')
-    # tar = tarfile.open(tarpath, 'r:gz')
-    # tar.extractall(path=saved_model)
-
-    model_path = os.path.join(model_dir, 'best.pth')
-    model.load_state_dict(torch.load(model_path, map_location=device))
-
-    return model
 
 # collate_fn needs for batch
 def collate_fn(batch):
@@ -40,7 +26,7 @@ def inference(data_dir, model_dir, output_dir, args):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     num_classes = CustomDataset.num_classes  # 18
-    model = load_model(model_dir, num_classes, device).to(device)
+    model = load_model(model_dir, num_classes, device, args, 'inference').to(device)
     model.eval()
 
     test_path = os.path.join(data_dir, 'test.json')
