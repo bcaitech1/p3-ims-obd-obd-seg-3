@@ -15,6 +15,9 @@ from albumentations.pytorch import ToTensorV2
 
 from utils import label_accuracy_score, seed_everything, seed_worker
 from loss import create_criterion
+from loss import JointEdgeSegLoss
+import torch.nn as nn
+from gscnn_utils.network.mynn import initialize_weights, Norm2d
 
 import time
 
@@ -92,19 +95,56 @@ def train(data_dir, model_dir, args):
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
-                                            num_workers=1,
+                                            num_workers=4,
                                             collate_fn=collate_fn,
                                             worker_init_fn=seed_worker)
 
     # -- model
-    model_module = getattr(import_module("model"), args.model)  # default: BaseModel
-    model = model_module(
-        num_classes=num_classes
-    ).to(device)
-    model = torch.nn.DataParallel(model)
+    if args.model != "GSCNN":
+        model_module = getattr(import_module("model"), args.model)  # default: BaseModel
+        model = model_module(
+            num_classes=num_classes
+        ).to(device)
+        model = torch.nn.DataParallel(model)
+
+    # GSCNN pretrian 모델 불러오기
+    else:
+        model_module = getattr(import_module("model"), args.model)  # default: BaseModel
+        model = model_module(
+            num_classes=19
+        ).to(device)
+        model = torch.nn.DataParallel(model)
+        model_path = '/opt/ml/p3-ims-obd-obd-seg-3/code/gscnn_utils/best_cityscapes_checkpoint.pth'  # pretrain 저장위치
+        pre_trained_state_dict = torch.load(model_path, map_location=device)["state_dict"]
+        model.load_state_dict(pre_trained_state_dict)
+        # for name, param in model.named_parameters():
+        #     if "final_seg" in name:
+        #         print(name)
+        #         print(param)
+        model.module.final_seg = nn.Sequential(
+            nn.Conv2d(256 + 48, 256, kernel_size=3, padding=1, bias=False),
+            Norm2d(256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, 256, kernel_size=3, padding=1, bias=False),
+            Norm2d(256),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(256, num_classes, kernel_size=1, bias=False))
+        initialize_weights(model.module.final_seg)
+        model.module.num_classes = num_classes
+        model = model.to(device)
+        # for name, param in model.named_parameters():
+        #     if "final_seg" in name:
+        #         print(name)
+        #         print(param)
 
     # -- loss & metric
-    criterion = create_criterion(args.criterion)  # default: cross_entropy
+    if args.model == "GSCNN":
+        criterion = JointEdgeSegLoss(classes=12,
+           ignore_index=255, upper_bound=args.wt_bound,
+           edge_weight=args.edge_weight, seg_weight=args.seg_weight, att_weight=args.att_weight, dual_weight=args.dual_weight).cuda()
+    else:
+        criterion = create_criterion(args.criterion)  # default: cross_entropy
+
     opt_module = getattr(import_module("torch.optim"), args.optimizer)  # default: Adam
     optimizer = opt_module(
         filter(lambda p: p.requires_grad, model.parameters()),
@@ -126,17 +166,20 @@ def train(data_dir, model_dir, args):
         train_loss = 0
         train_cnt = 0
         train_mIoU_list = []
-        for idx, (images, masks, _) in enumerate(train_loader):
+        for idx, (images, masks, edgemap, _) in enumerate(train_loader):
             images = torch.stack(images)        # (batch, channel, height, width)
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
-            images, masks = images.to(device), masks.to(device)
+            edgemap = torch.stack(edgemap)
+            images, masks, edgemap = images.to(device), masks.to(device), edgemap.to(device)
 
-            if args.model = "GSCNN":
-                outputs = model(images)
-                loss = criterion(outputs, masks)
+            if args.model == "GSCNN":
+                gts = (masks, edgemap)
+                outputs, edge_out = model(images)
+                loss = criterion((outputs, edge_out), gts, args)
             else:
                 outputs = model(images)
                 loss = criterion(outputs, masks)
+
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -172,15 +215,19 @@ def train(data_dir, model_dir, args):
             total_loss = 0
             cnt = 0
             mIoU_list = []
-            for (images, masks, _) in val_loader:
+            for (images, masks, edgemap, _) in val_loader:
                 images = torch.stack(images)        # (batch, channel, height, width)
                 masks = torch.stack(masks).long()   # (batch, channel, height, width)
-
-                images, masks = images.to(device), masks.to(device)
+                edgemap = torch.stack(edgemap)
+                images, masks, edgemap = images.to(device), masks.to(device), edgemap.to(device)
                 
-                outputs = model(images)
-                
-                loss = criterion(outputs, masks)
+                if args.model == "GSCNN":
+                    gts = (masks, edgemap)
+                    outputs, edge_out = model(images)
+                    loss = criterion((outputs, edge_out), gts, args)
+                else:
+                    outputs = model(images)
+                    loss = criterion(outputs, masks)
 
                 total_loss += loss
                 cnt += 1
@@ -221,7 +268,7 @@ if __name__ == '__main__':
     # Resize도 현재는 적용안되어 있음 (원본 size 크니깐 resize 필요해보임) Crop은 조심. 
     # parser.add_argument("--resize", nargs="+", type=list, default=[128, 96], help='resize size for image when training')
     parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training (default: 64)')
-    parser.add_argument('--valid_batch_size', type=int, default=16, help='input batch size for validing (default: 1000)')
+    parser.add_argument('--valid_batch_size', type=int, default=8, help='input batch size for validing (default: 1000)')
     parser.add_argument('--model', type=str, default='FCN8s', help='model type (default: BaseModel)')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer type (default: SGD)')
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate (default: 1e-3)')
@@ -239,6 +286,13 @@ if __name__ == '__main__':
     # Container environment
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml/input/data'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
+
+    # loss weight for GSCNN
+    parser.add_argument('--edge_weight', type=float, default=1.0, help='Edge loss weight for joint loss')
+    parser.add_argument('--seg_weight', type=float, default=1.0, help='Segmentation loss weight for joint loss')
+    parser.add_argument('--att_weight', type=float, default=0.1, help='Attention loss weight for joint loss')
+    parser.add_argument('--dual_weight', type=float, default=1.0, help='Dual loss weight for joint loss')
+    parser.add_argument('-wb', '--wt_bound', type=float, default=1.0)
 
     args = parser.parse_args()
 
@@ -258,6 +312,7 @@ if __name__ == '__main__':
 ### apt-get update
 ### apt-get install -y libsm6 libxext6 libxrender-dev
 ### pip install opencv-python
+### pip install scipy==1.2.0
 
 ### Tesnorboard 쓰는법  ####
 ###### step1 : terminal에서 tensorboard --logdir='p3-ims-obd-obd-seg-3/model' --bind_all  입력
@@ -266,7 +321,9 @@ if __name__ == '__main__':
     data_dir = args.data_dir
     model_dir = args.model_dir
 
-    args.model = 'DeepLapV3PlusResnext101'
-    args.name = "DeepLapV3PlusResnext101-epoch20"
+    args.batch_size = 4
+    args.lr = 7e-5
+    args.model = 'GSCNN'
+    args.name = "GSCNN_archtecture_loss_change"
 
     train(data_dir, model_dir, args)

@@ -11,6 +11,11 @@ from torch.utils.data import Dataset, DataLoader
 import cv2
 import os
 
+from scipy.ndimage.morphology import distance_transform_edt
+from gscnn_utils.datasets import edge_utils
+import torch
+
+
 dataset_path = '/opt/ml/input/data'
 
 def get_classname(classID, cats):
@@ -31,6 +36,67 @@ class BaseAugmentation:
             return self.transform(image=image)
         else:
             return self.transform(image=image, mask=masks)
+
+def mask_to_onehot(mask, num_classes):
+    """
+    Converts a segmentation mask (H,W) to (K,H,W) where the last dim is a one
+    hot encoding vector
+
+    """
+    _mask = [mask == (i + 1) for i in range(num_classes)]
+    return np.array(_mask).astype(np.uint8)
+
+def onehot_to_mask(mask):
+    """
+    Converts a mask (K,H,W) to (H,W)
+    """
+    _mask = np.argmax(mask, axis=0)
+    _mask[_mask != 0] += 1
+    return _mask
+
+def onehot_to_multiclass_edges(mask, radius, num_classes):
+    """
+    Converts a segmentation mask (K,H,W) to an edgemap (K,H,W)
+
+    """
+    if radius < 0:
+        return mask
+    
+    # We need to pad the borders for boundary conditions
+    mask_pad = np.pad(mask, ((0, 0), (1, 1), (1, 1)), mode='constant', constant_values=0)
+    
+    channels = []
+    for i in range(num_classes):
+        dist = distance_transform_edt(mask_pad[i, :])+distance_transform_edt(1.0-mask_pad[i, :])
+        dist = dist[1:-1, 1:-1]
+        dist[dist > radius] = 0
+        dist = (dist > 0).astype(np.uint8)
+        channels.append(dist)
+        
+    return np.array(channels)
+
+def onehot_to_binary_edges(mask, radius, num_classes):
+    """
+    Converts a segmentation mask (K,H,W) to a binary edgemap (H,W)
+
+    """
+    
+    if radius < 0:
+        return mask
+    
+    # We need to pad the borders for boundary conditions
+    mask_pad = np.pad(mask, ((0, 0), (1, 1), (1, 1)), mode='constant', constant_values=0)
+    
+    edgemap = np.zeros(mask.shape[1:])
+
+    for i in range(num_classes):
+        dist = distance_transform_edt(mask_pad[i, :])+distance_transform_edt(1.0-mask_pad[i, :])
+        dist = dist[1:-1, 1:-1]
+        dist[dist > radius] = 0
+        edgemap += dist
+    edgemap = np.expand_dims(edgemap, axis=0)    
+    edgemap = (edgemap > 0).astype(np.uint8)
+    return edgemap
 
 
 class CustomDataset(Dataset):
@@ -77,8 +143,14 @@ class CustomDataset(Dataset):
                 transformed = self.transform(image=images, mask=masks)
                 images = transformed["image"]
                 masks = transformed["mask"]
-            
-            return images, masks, image_infos
+
+            _edgemap = masks.numpy()
+            _edgemap = edge_utils.mask_to_onehot(_edgemap, CustomDataset.num_classes)
+            edgemap = edge_utils.onehot_to_binary_edges(_edgemap, 2, CustomDataset.num_classes)
+            # print(_edgemap)
+            edgemap = torch.FloatTensor(edgemap)
+
+            return images, masks, edgemap, image_infos
         
         if self.mode == 'test':
             # transform -> albumentations 라이브러리 활용

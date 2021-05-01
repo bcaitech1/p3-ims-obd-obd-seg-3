@@ -16,3 +16,4 @@
 /code/DilatedNet baseline.ipynb
 /code/SegNet baseline.ipynb
 /code/__pycache__/*
+/gscnn_utils/*.pth

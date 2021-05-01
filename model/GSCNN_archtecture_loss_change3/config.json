@@ -1,0 +1,23 @@
+{
+    "seed": 42,
+    "epochs": 20,
+    "dataset": "CustomDataset",
+    "augmentation": "BaseAugmentation",
+    "batch_size": 4,
+    "valid_batch_size": 8,
+    "model": "GSCNN",
+    "optimizer": "Adam",
+    "lr": 7e-05,
+    "val_ratio": 0.2,
+    "criterion": "cross_entropy",
+    "lr_decay_step": 20,
+    "log_interval": 20,
+    "name": "GSCNN_archtecture_loss_change",
+    "data_dir": "/opt/ml/input/data",
+    "model_dir": "../model",
+    "edge_weight": 1.0,
+    "seg_weight": 1.0,
+    "att_weight": 0.1,
+    "dual_weight": 1.0,
+    "wt_bound": 1.0
+}
