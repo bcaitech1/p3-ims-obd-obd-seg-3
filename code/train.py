@@ -106,10 +106,10 @@ def train(data_dir, model_dir, args):
     else:
         if os.path.exists(os.path.join(model_dir, args.name, 'latest.pth')):
             print(f'start loading model from {os.path.join(args.name, "latest.pth")}...')
-            model = load_model(model_dir, num_classes, device, args, 'latest.pth').to(device)
+            model = load_model(model_dir, num_classes, device, args, 'train', 'latest.pth').to(device)
         else:
             print(f'start loading model from {os.path.join(args.name, "best.pth")}...')
-            model = load_model(model_dir, num_classes, device, args, 'best.pth').to(device)
+            model = load_model(model_dir, num_classes, device, args, 'train', 'best.pth').to(device)
         model = torch.nn.DataParallel(model)
         save_dir = os.path.join(model_dir, args.name)
     if not os.path.exists(save_dir):
