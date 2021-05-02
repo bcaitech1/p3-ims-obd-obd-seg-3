@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from utils import label_accuracy_score, seed_everything, seed_worker
+from utils import label_accuracy_score, seed_everything, seed_worker, copyblob
 from loss import create_criterion
 
 import time
@@ -59,6 +59,13 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
+        # A.OneOf([
+        #     A.CropNonEmptyMaskIfExists(256, 256, p=1),
+        #     A.CropNonEmptyMaskIfExists(400, 400, p=1),
+        # ], p=0.5),
+        A.HorizontalFlip(p=0.5),
+        A.Rotate(30),
+        A.Resize(512,512),
         ToTensorV2(),
     ])
     val_transform = A.Compose([
@@ -76,8 +83,8 @@ def train(data_dir, model_dir, args):
     # create own Dataset 2
     transform_module = getattr(import_module("dataset"), args.dataset)  # default: BaseAugmentation
     category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
-    train_dataset = transform_module(data_dir=train_path, category_names=category_names, mode='train', transform=train_transform)
-    val_dataset = transform_module(data_dir=val_path, category_names=category_names, mode='val', transform=val_transform)
+    train_dataset = transform_module(data_dir=train_path, category_names=category_names, mode='train', transform=train_transform, cutmix=args.cutmix)
+    val_dataset = transform_module(data_dir=val_path, category_names=category_names, mode='val', transform=val_transform, cutmix=args.cutmix)
     num_classes = train_dataset.num_classes  # 12
 
     # DataLoader
@@ -92,7 +99,7 @@ def train(data_dir, model_dir, args):
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
-                                            num_workers=1,
+                                            num_workers=4,
                                             collate_fn=collate_fn,
                                             worker_init_fn=seed_worker)
 
@@ -152,6 +159,17 @@ def train(data_dir, model_dir, args):
         train_cnt = 0
         train_mIoU_list = []
         for idx, (images, masks, _) in enumerate(train_loader):
+
+            # copyblob을 만들기어 주기 위한 loop
+            if args.copyblob:
+                for i in range(images.size()[0]):
+                    rand_idx = np.random.randint(inputs.size()[0])
+                    # category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
+                    # random(?) --> background(0)
+                    copyblob(src_img=inputs[i], src_mask=labels[i], dst_img=inputs[rand_idx], dst_mask=labels[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=0)
+                    # random(?) --> paper(3)
+                    copyblob(src_img=inputs[i], src_mask=labels[i], dst_img=inputs[rand_idx], dst_mask=labels[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=3)
+
             images = torch.stack(images)        # (batch, channel, height, width)
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
             images, masks = images.to(device), masks.to(device)
@@ -244,7 +262,7 @@ if __name__ == '__main__':
 
     # Data and model checkpoints directories
     parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
-    parser.add_argument('--epochs', type=int, default=20, help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=30 , help='number of epochs to train (default: 1)')
     parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: MaskBaseDataset)')
     parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
 
@@ -270,6 +288,10 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml/input/data'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
     parser.add_argument('--load_model', type=bool, default=False)
+
+    # Special Augmentations
+    parser.add_argument('--copyblob', type=bool, default=False, help='copyblob on')
+    parser.add_argument('--cutmix', type=bool, default=False, help='cutmix on (default: False)')
 
     args = parser.parse_args()
 
@@ -299,5 +321,9 @@ if __name__ == '__main__':
 
     # args.model = 'DeepLapV3PlusResnext101'
     # args.name = "DeepLapV3PlusResnext101-epoch20"
+
+    # args.model = 'DeepLapV3PlusEfficientnetB0NoisyStudent'
+    # args.name = "cutmix(rand)_DeepLabV3Plus_Effi_B0_NoisyStudent"
+    # args.load_model = True
 
     train(data_dir, model_dir, args)
