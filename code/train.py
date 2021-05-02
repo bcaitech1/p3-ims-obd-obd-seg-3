@@ -83,8 +83,8 @@ def train(data_dir, model_dir, args):
     # create own Dataset 2
     transform_module = getattr(import_module("dataset"), args.dataset)  # default: BaseAugmentation
     category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
-    train_dataset = transform_module(data_dir=train_path, category_names=category_names, mode='train', transform=train_transform)
-    val_dataset = transform_module(data_dir=val_path, category_names=category_names, mode='val', transform=val_transform)
+    train_dataset = transform_module(data_dir=train_path, category_names=category_names, mode='train', transform=train_transform, cutmix=args.cutmix)
+    val_dataset = transform_module(data_dir=val_path, category_names=category_names, mode='val', transform=val_transform, cutmix=args.cutmix)
     num_classes = train_dataset.num_classes  # 12
 
     # DataLoader
@@ -289,8 +289,9 @@ if __name__ == '__main__':
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
     parser.add_argument('--load_model', type=bool, default=False)
 
-    # copyblob
+    # Special Augmentations
     parser.add_argument('--copyblob', type=bool, default=False, help='copyblob on')
+    parser.add_argument('--cutmix', type=bool, default=False, help='cutmix on (default: False)')
 
     args = parser.parse_args()
 
