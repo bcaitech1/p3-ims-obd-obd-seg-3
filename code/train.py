@@ -13,7 +13,7 @@ from torch.utils.tensorboard import SummaryWriter
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
-from utils import label_accuracy_score, seed_everything, seed_worker
+from utils import label_accuracy_score, seed_everything, seed_worker, copyblob
 from loss import create_criterion
 
 import time
@@ -159,6 +159,17 @@ def train(data_dir, model_dir, args):
         train_cnt = 0
         train_mIoU_list = []
         for idx, (images, masks, _) in enumerate(train_loader):
+
+            # copyblob을 만들기어 주기 위한 loop
+            if args.copyblob:
+                for i in range(images.size()[0]):
+                    rand_idx = np.random.randint(inputs.size()[0])
+                    # category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
+                    # random(?) --> background(0)
+                    copyblob(src_img=inputs[i], src_mask=labels[i], dst_img=inputs[rand_idx], dst_mask=labels[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=0)
+                    # random(?) --> paper(3)
+                    copyblob(src_img=inputs[i], src_mask=labels[i], dst_img=inputs[rand_idx], dst_mask=labels[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=3)
+
             images = torch.stack(images)        # (batch, channel, height, width)
             masks = torch.stack(masks).long()   # (batch, channel, height, width)
             images, masks = images.to(device), masks.to(device)
@@ -277,6 +288,9 @@ if __name__ == '__main__':
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml/input/data'))
     parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_MODEL_DIR', '../model'))
     parser.add_argument('--load_model', type=bool, default=False)
+
+    # copyblob
+    parser.add_argument('--copyblob', type=bool, default=False, help='copyblob on')
 
     args = parser.parse_args()
 
