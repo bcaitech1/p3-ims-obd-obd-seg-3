@@ -59,6 +59,13 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
+        # A.OneOf([
+        #     A.CropNonEmptyMaskIfExists(256, 256, p=1),
+        #     A.CropNonEmptyMaskIfExists(400, 400, p=1),
+        # ], p=0.5),
+        A.HorizontalFlip(p=0.5),
+        A.Rotate(30),
+        A.Resize(512,512),
         ToTensorV2(),
     ])
     val_transform = A.Compose([
@@ -92,7 +99,7 @@ def train(data_dir, model_dir, args):
     val_loader = torch.utils.data.DataLoader(dataset=val_dataset, 
                                             batch_size=args.valid_batch_size,
                                             shuffle=False,
-                                            num_workers=1,
+                                            num_workers=4,
                                             collate_fn=collate_fn,
                                             worker_init_fn=seed_worker)
 
@@ -244,7 +251,7 @@ if __name__ == '__main__':
 
     # Data and model checkpoints directories
     parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
-    parser.add_argument('--epochs', type=int, default=20, help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=30 , help='number of epochs to train (default: 1)')
     parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: MaskBaseDataset)')
     parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
 
@@ -299,5 +306,9 @@ if __name__ == '__main__':
 
     # args.model = 'DeepLapV3PlusResnext101'
     # args.name = "DeepLapV3PlusResnext101-epoch20"
+
+    # args.model = 'DeepLapV3PlusEfficientnetB0NoisyStudent'
+    # args.name = "cutmix(rand)_DeepLabV3Plus_Effi_B0_NoisyStudent"
+    # args.load_model = True
 
     train(data_dir, model_dir, args)
