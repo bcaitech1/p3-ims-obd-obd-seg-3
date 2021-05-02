@@ -1,0 +1,14 @@
+Compose([
+  OneOf([
+    CropNonEmptyMaskIfExists(always_apply=False, p=1, height=256, width=256, ignore_values=None, ignore_channels=None),
+    CropNonEmptyMaskIfExists(always_apply=False, p=1, height=400, width=400, ignore_values=None, ignore_channels=None),
+  ], p=0.5),
+  HorizontalFlip(always_apply=False, p=0.5),
+  Rotate(always_apply=False, p=0.5, limit=(-30, 30), interpolation=1, border_mode=4, value=None, mask_value=None),
+  Resize(always_apply=False, p=1, height=512, width=512, interpolation=1),
+  ToTensorV2(always_apply=True, p=1.0, transpose_mask=False),
+], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})
+
+Compose([
+  ToTensorV2(always_apply=True, p=1.0, transpose_mask=False),
+], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})
