@@ -17,6 +17,7 @@ from torch.autograd import Variable
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 
+
 # https://discuss.pytorch.org/t/is-this-a-correct-implementation-for-focal-loss-in-pytorch/43327/8
 class FocalLoss(nn.Module):
     def __init__(self, weight=None,
@@ -42,27 +43,32 @@ class FocalLoss2(nn.Module):
         super(FocalLoss2, self).__init__()
         self.gamma = gamma
         self.alpha = alpha
-        if isinstance(alpha,(float,int)): self.alpha = torch.Tensor([alpha,1-alpha])
-        if isinstance(alpha,list): self.alpha = torch.Tensor(alpha)
+        if isinstance(alpha, (float, int)): self.alpha = torch.Tensor([alpha, 1 - alpha])
+        if isinstance(alpha, list): self.alpha = torch.Tensor(alpha)
         self.size_average = size_average
+
     def forward(self, input, target):
-        if input.dim()>2:
-            input = input.view(input.size(0),input.size(1),-1)  # N,C,H,W => N,C,H*W
-            input = input.transpose(1,2)    # N,C,H*W => N,H*W,C
-            input = input.contiguous().view(-1,input.size(2))   # N,H*W,C => N*H*W,C
-        target = target.view(-1,1)
+        if input.dim() > 2:
+            input = input.view(input.size(0), input.size(1), -1)  # N,C,H,W => N,C,H*W
+            input = input.transpose(1, 2)  # N,C,H*W => N,H*W,C
+            input = input.contiguous().view(-1, input.size(2))  # N,H*W,C => N*H*W,C
+        target = target.view(-1, 1)
         logpt = F.log_softmax(input)
-        logpt = logpt.gather(1,target)
+        logpt = logpt.gather(1, target)
         logpt = logpt.view(-1)
         pt = Variable(logpt.data.exp())
         if self.alpha is not None:
-            if self.alpha.type()!=input.data.type():
+            if self.alpha.type() != input.data.type():
                 self.alpha = self.alpha.type_as(input.data)
-            at = self.alpha.gather(0,target.data.view(-1))
+            at = self.alpha.gather(0, target.data.view(-1))
             logpt = logpt * Variable(at)
-        loss = -1 * (1-pt)**self.gamma * logpt
-        if self.size_average: return loss.mean()
-        else: return loss.sum()
+        loss = -1 * (1 - pt) ** self.gamma * logpt
+        if self.size_average:
+            return loss.mean()
+        else:
+            return loss.sum()
+
+
 def get_classes_count():
     # 모든 사진들로부터 background를 제외한 클래스별 픽셀 카운트를 구합니다.
     coco = COCO("../input/data/train_all.json")
@@ -87,9 +93,15 @@ class WeightedCrossEntropy(nn.Module):
         super(WeightedCrossEntropy, self).__init__()
         classes_count = get_classes_count()  # 클래스 별 카운트
         weights = torch.tensor(classes_count)
+        # weights = torch.pow(weights, 1./10) # 10분의 1승 적용
+        weights = torch.log(weights)  # 로그함수 적용
         weights = weights / weights.sum()
         weights = 1.0 / weights
         weights = weights / weights.sum()
+        print("* 클래스 별 픽셀 갯수")
+        print(classes_count)
+        print("* 최종 weight")
+        print(weights)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         weights = weights.to(device)
         self.CrossEntropyLoss = nn.CrossEntropyLoss(weight=weights)
@@ -202,9 +214,9 @@ def make_one_hot(labels, C=12):
     labels.to(device)
     one_hot = torch.FloatTensor(labels.size(0), C, labels.size(2), labels.size(3)).zero_().to(device)
     target = one_hot.scatter_(1, labels.data.to(device), 1)
-    
+
     target = Variable(target)
-        
+
     return target
 
 
@@ -241,7 +253,7 @@ class HausdorffDTLoss(nn.Module):
         return field
 
     def forward(
-        self, pred: torch.Tensor, target: torch.Tensor, debug=False
+            self, pred: torch.Tensor, target: torch.Tensor, debug=False
     ) -> torch.Tensor:
         """
         Uses one binary channel: 1 - fg, 0 - bg
@@ -293,7 +305,19 @@ class HausdorffDTLoss(nn.Module):
                 loss_sum += loss
         ce_loss_f = nn.CrossEntropyLoss()
         ce_loss = ce_loss_f(pred_, target_)
-        return loss_sum / 12 / pred_all.shape[0]/3 + ce_loss
+        return loss_sum / 12 / pred_all.shape[0] / 3 + ce_loss
+
+
+class DiceLoss(nn.Module):
+    def __init__(self):
+        super(DiceLoss, self).__init__()
+
+    def forward(self, inputs, target):
+        target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
+        target = make_one_hot(target)
+        numerator = 2 * torch.sum(inputs * target)
+        denominator = torch.sum(inputs + target)
+        return 1 - (numerator + 1) / (denominator + 1)
 
 
 _criterion_entrypoints = {
@@ -302,12 +326,13 @@ _criterion_entrypoints = {
     'focal': FocalLoss,
     'label_smoothing': LabelSmoothingLoss,
     'f1': F1Loss,
-    'soft_cross_entropy' : softCrossEntropy,
-    'focal_softCE' : focal_softCrossEntropy,
-    'focal2': FocalLoss2,
-    'HausdorffDT' : HausdorffDTLoss,
     'soft_cross_entropy': softCrossEntropy,
-    'focal_softCE': focal_softCrossEntropy
+    'focal_softCE': focal_softCrossEntropy,
+    'focal2': FocalLoss2,
+    'HausdorffDT': HausdorffDTLoss,
+    'soft_cross_entropy': softCrossEntropy,
+    'focal_softCE': focal_softCrossEntropy,
+    'dice': DiceLoss
 }
 
 
