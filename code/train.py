@@ -59,10 +59,11 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-        # A.OneOf([
-        #     A.CropNonEmptyMaskIfExists(256, 256, p=1),
-        #     A.CropNonEmptyMaskIfExists(400, 400, p=1),
-        # ], p=0.5),
+        A.OneOf([
+            A.CropNonEmptyMaskIfExists(256, 256, p=1),
+            A.CropNonEmptyMaskIfExists(370, 370, p=1),
+            A.CropNonEmptyMaskIfExists(150, 150, p=1),
+        ], p=0.5),
         A.HorizontalFlip(p=0.5),
         A.Rotate(30),
         A.Resize(512,512),
@@ -117,6 +118,7 @@ def train(data_dir, model_dir, args):
             model = load_model(model_dir, num_classes, device, args, args.model,'train', 'best.pth').to(device)
         model = torch.nn.DataParallel(model)
         save_dir = os.path.join(model_dir, args.name)
+    print(model)
     if not os.path.exists(save_dir):
         os.mkdir(save_dir)
     with open(os.path.join(save_dir, 'transform'), 'w') as f:
@@ -163,7 +165,7 @@ def train(data_dir, model_dir, args):
 
             # copyblob을 만들기어 주기 위한 loop
             if args.copyblob:
-                for i in range(images.size()[0]):
+                for i in range(images.shape[0]):
                     rand_idx = np.random.randint(inputs.size()[0])
                     # category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
                     # random(?) --> background(0)
@@ -325,8 +327,10 @@ if __name__ == '__main__':
     # args.model = 'DeepLapV3PlusResnext101'
     # args.name = "DeepLapV3PlusResnext101-epoch20"
 
-    # args.model = 'DeepLapV3PlusEfficientnetB0NoisyStudent'
-    # args.name = "cutmix(rand)_DeepLabV3Plus_Effi_B0_NoisyStudent"
+    args.model = 'DeepLapV3PlusEfficientnetB0NoisyStudent'
+    args.name = "(copyblob)DeepLapV3PlusEfficientnetB0NoisyStudent"
+    args.cutmix = True
+    # args.copyblob = True
     # args.load_model = True
 
     train(data_dir, model_dir, args)

@@ -47,12 +47,12 @@ def inference(data_dir, model_dir, output_dir, args):
     test_dataset = transform_module(data_dir=test_path, category_names=category_names, mode='test',
                                     transform=test_transform)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
-                                              batch_size=args.batch_size,
-                                              num_workers=1,
-                                              collate_fn=collate_fn,
-                                              pin_memory=use_cuda,
-                                              drop_last=False,
-                                              )
+                                            batch_size=args.batch_size,
+                                            num_workers=4,
+                                            collate_fn=collate_fn,
+                                            pin_memory=use_cuda,
+                                            drop_last=False,
+                                            )
 
     size = 256
     transform = A.Compose([A.Resize(256, 256)])

@@ -237,17 +237,17 @@ class DeepLapV3PlusInceptionresnetv2(nn.Module):
 
     def __init__(self, num_classes):
         super().__init__()
-        # aux_params=dict(
-        #     pooling='avg',             # one of 'avg', 'max'
-        #     dropout=0.5,               # dropout ratio, default is None
-        #     activation='sigmoid',      # activation function, default is None
-        #     classes=12,                 # define number of output labels
-        # )
+        aux_params=dict(
+            pooling='avg',             # one of 'avg', 'max'
+            dropout=0.5,               # dropout ratio, default is None
+            activation='sigmoid',      # activation function, default is None
+            classes=12,                 # define number of output labels
+        )
         self.model = smp.UnetPlusPlus(
             encoder_name=self.ENCODER,
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
-            # aux_params=aux_params,
+            aux_params=aux_params,
         )
 
     def forward(self, x):
