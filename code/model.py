@@ -85,6 +85,7 @@ class FCN8s(nn.Module):
 
         return upscore8
 
+
 # Custom Model Template
 class DeepLapV3PlusEfficientnetB5(nn.Module):
     ENCODER = 'efficientnet-b5'
@@ -149,6 +150,7 @@ class DeepLapV3PlusEfficientnetB5NoisyStudent(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+
 class DeepLapV3PlusEfficientnetB0Imagenet(nn.Module):
     ENCODER = 'timm-efficientnet-b0'
     ENCODER_WEIGHTS = 'imagenet'
@@ -163,6 +165,7 @@ class DeepLapV3PlusEfficientnetB0Imagenet(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+
 
 class DeepLapV3PlusEfficientnetB0Advprop(nn.Module):
     ENCODER = 'timm-efficientnet-b0'
@@ -179,6 +182,7 @@ class DeepLapV3PlusEfficientnetB0Advprop(nn.Module):
     def forward(self, x):
         return self.model(x)
 
+
 class DeepLapV3PlusEfficientnetB0NoisyStudent(nn.Module):
     ENCODER = 'timm-efficientnet-b0'
     ENCODER_WEIGHTS = 'noisy-student'
@@ -193,7 +197,6 @@ class DeepLapV3PlusEfficientnetB0NoisyStudent(nn.Module):
 
     def forward(self, x):
         return self.model(x)
-
 
 
 class ResNet34(nn.Module):
@@ -298,6 +301,23 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
             # aux_params=aux_params,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class UnetPlusPlusResnext50Swsl(nn.Module):
+    ENCODER = 'resnext50_32x4d'
+    ENCODER_WEIGHTS = 'swsl'
+
+    def __init__(self, num_classes):
+        super().__init__()
+
+        self.model = smp.UnetPlusPlus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
         )
 
     def forward(self, x):
