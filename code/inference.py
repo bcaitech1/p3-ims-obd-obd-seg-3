@@ -37,7 +37,6 @@ def inference(data_dir, model_dir, output_dir, args):
     test_path = os.path.join(data_dir, 'test.json')
 
     test_transform = A.Compose([
-<<<<<<< HEAD
         A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
         A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
                          always_apply=False, p=0.5),
@@ -46,11 +45,6 @@ def inference(data_dir, model_dir, output_dir, args):
         # Normalized
         ToTensorV2(),
     ])
-=======
-        ToTensorV2()
-    ])
-
->>>>>>> ec54379c29fc3ba20ae7eb7f0edb59e608547b8a
     # test dataset
     category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic',
                       'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
@@ -64,12 +58,8 @@ def inference(data_dir, model_dir, output_dir, args):
                                               pin_memory=use_cuda,
                                               drop_last=False,
                                               )
-<<<<<<< HEAD
     print(test_loader.dataset)
     print(test_loader.dataset.mean_std)
-=======
-
->>>>>>> ec54379c29fc3ba20ae7eb7f0edb59e608547b8a
     size = 256
     transform = A.Compose([A.Resize(256, 256)])
     file_name_list = []
@@ -79,7 +69,6 @@ def inference(data_dir, model_dir, output_dir, args):
     with torch.no_grad():
         for step, (imgs, image_infos) in enumerate(test_loader):
             print(f"step : {step} / {len(test_loader)}")
-<<<<<<< HEAD
             if tta:
                 for tta in range(args.tta):
                     for idx, img in enumerate(imgs):
@@ -104,14 +93,6 @@ def inference(data_dir, model_dir, output_dir, args):
                 outs = softmax(outs)
                 for i in range(1, len(models)):
                     outs += softmax(models[i](torch.stack(imgs).to(device)))
-=======
-
-            # inference (512 x 512)
-            outs = models[0](torch.stack(imgs).to(device))
-            outs = softmax(outs)
-            for i in range(1, len(models)):
-                outs += softmax(models[i](torch.stack(imgs).to(device)))
->>>>>>> ec54379c29fc3ba20ae7eb7f0edb59e608547b8a
             oms = torch.argmax(outs.squeeze(), dim=1).detach().cpu().numpy()
             # resize (256 x 256)
             temp_mask = []
@@ -178,11 +159,7 @@ if __name__ == '__main__':
                                                                         '/opt/ml/model/DeepLapV3PlusEfficientnetB5NoisyStudent'))
     parser.add_argument('--output_dir', type=str,
                         default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/code/submission'))
-<<<<<<< HEAD
     parser.add_argument('--tta', type=int, default=0)
-=======
-
->>>>>>> ec54379c29fc3ba20ae7eb7f0edb59e608547b8a
     args = parser.parse_args()
 
     data_dir = args.data_dir
