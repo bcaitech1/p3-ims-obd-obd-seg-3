@@ -58,16 +58,21 @@ def train(data_dir, model_dir, args):
 
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
-    train_transform = A.Compose([
-        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
-        A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
-                         always_apply=False, p=0.5),
-        A.HorizontalFlip(p=0.5),
-        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
-        A.Resize(512, 512),
-        # Normalized
-        ToTensorV2(),
-    ])
+    if args.aug:
+        train_transform = A.Compose([
+            A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+            A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
+                             always_apply=False, p=0.5),
+            A.HorizontalFlip(p=0.5),
+            # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
+            A.Resize(512, 512),
+            # Normalized
+            ToTensorV2(),
+        ])
+    else:
+        train_transform = A.Compose([
+            ToTensorV2()
+        ])
     val_transform = A.Compose([
         ToTensorV2()
         ])
@@ -296,6 +301,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--train', type=str, default='train.json')
     parser.add_argument('--val', type=str, default='val.json')
+    parser.add_argument('--aug', type=bool, default=False)
     args = parser.parse_args()
 
     seed_everything(args.seed)

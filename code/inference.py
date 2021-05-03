@@ -37,11 +37,7 @@ def inference(data_dir, model_dir, output_dir, args):
     test_path = os.path.join(data_dir, 'test.json')
 
     test_transform = A.Compose([
-        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
-        A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
-                         always_apply=False, p=0.5),
-        A.HorizontalFlip(p=0.5),
-        A.Resize(512, 512),
+        A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
         # Normalized
         ToTensorV2(),
     ])
@@ -137,7 +133,7 @@ def make_submission(data_dir, model_dir, output_dir, args):
     submission.to_csv(save_file_path, index=False)
 
     print("save submission done!")
-
+    print(f'file path: {save_file_path}')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
