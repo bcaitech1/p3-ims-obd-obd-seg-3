@@ -49,8 +49,8 @@ def train(data_dir, model_dir, args):
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # train.json / validation.json / test.json 디렉토리 설정
-    train_path = data_dir + '/train.json'
-    val_path = data_dir + '/val.json'
+    train_path = data_dir + '/' + args.train
+    val_path = data_dir + '/' + args.val
 
     # collate_fn needs for batch
     def collate_fn(batch):
@@ -58,17 +58,22 @@ def train(data_dir, model_dir, args):
 
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
-    train_transform = A.Compose([
-        # A.OneOf([
-        #     A.CropNonEmptyMaskIfExists(150, 150, p=1),
-        #     A.CropNonEmptyMaskIfExists(256, 256, p=1),
-        #     A.CropNonEmptyMaskIfExists(400, 400, p=1),
-        # ], p=0.5),
-        A.HorizontalFlip(p=0.5),
-        A.Rotate(30),
-        A.Resize(512,512),
-        ToTensorV2(),
-    ])
+
+    if args.aug:
+        train_transform = A.Compose([
+            A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+            A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
+                             always_apply=False, p=0.5),
+            A.HorizontalFlip(p=0.5),
+            # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
+            A.Resize(512, 512),
+            # Normalized
+            ToTensorV2(),
+        ])
+    else:
+        train_transform = A.Compose([
+            ToTensorV2()
+        ])
     val_transform = A.Compose([
         ToTensorV2()
         ])
@@ -114,11 +119,9 @@ def train(data_dir, model_dir, args):
 
     else:
         if os.path.exists(os.path.join(model_dir, args.name, 'latest.pth')):
-            print(f'start loading model from {os.path.join(args.name, "latest.pth")}...')
-            model = load_model(model_dir, num_classes, device, args, 'train', 'latest.pth').to(device)
+            model = load_model(model_dir, num_classes, device, args, args.model,'train', 'latest.pth').to(device)
         else:
-            print(f'start loading model from {os.path.join(args.name, "best.pth")}...')
-            model = load_model(model_dir, num_classes, device, args, 'train', 'best.pth').to(device)
+            model = load_model(model_dir, num_classes, device, args, args.model,'train', 'best.pth').to(device)
         model = torch.nn.DataParallel(model)
         save_dir = os.path.join(model_dir, args.name)
     if not os.path.exists(save_dir):
@@ -159,8 +162,11 @@ def train(data_dir, model_dir, args):
     best_val_mIoU = train_info['best_val_mIOU']
     print(f'best_val_mIOU: {best_val_mIoU}')
     print(f'start_epoch: {start_epoch}')
+    if start_epoch >= args.epochs:
+        print('already trained')
+        return
     best_val_loss = np.inf
-    for epoch in range(start_epoch, start_epoch + args.epochs):
+    for epoch in range(start_epoch, args.epochs):
         model.train()
         train_loss = 0
         train_cnt = 0
@@ -205,7 +211,7 @@ def train(data_dir, model_dir, args):
                 train_loss = train_loss / train_cnt
                 current_lr = get_lr(optimizer)
                 print(
-                    f"Epoch[{epoch+1}/{start_epoch + args.epochs}]({idx + 1}/{len(train_loader)}) || "
+                    f"Epoch[{epoch+1}/{args.epochs}]({idx + 1}/{len(train_loader)}) || "
                     f"training loss {train_loss:4.4} || training mIoU {np.mean(train_mIoU_list):4.2%} || lr {current_lr}"
                 )
                 logger.add_scalar("Train/loss", train_loss, epoch * len(train_loader) + idx)
@@ -305,6 +311,9 @@ if __name__ == '__main__':
     parser.add_argument('--copyblob', type=bool, default=False, help='copyblob on')
     parser.add_argument('--cutmix', type=bool, default=False, help='cutmix on (default: False)')
 
+    parser.add_argument('--train', type=str, default='train.json')
+    parser.add_argument('--val', type=str, default='val.json')
+    parser.add_argument('--aug', type=bool, default=False)
     args = parser.parse_args()
 
     seed_everything(args.seed)

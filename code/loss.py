@@ -1,3 +1,4 @@
+import segmentation_models_pytorch.utils.losses
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -13,6 +14,7 @@ from scipy.ndimage.morphology import distance_transform_edt as edt
 from scipy.ndimage import convolve
 
 from torch.autograd import Variable
+import segmentation_models_pytorch as smp
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -311,13 +313,77 @@ class HausdorffDTLoss(nn.Module):
 class DiceLoss(nn.Module):
     def __init__(self):
         super(DiceLoss, self).__init__()
+        self.DiceLoss = smp.utils.losses.DiceLoss()
 
     def forward(self, inputs, target):
+        # inputs: N, C(probs), H, W -> N, C(max_one_hot), H, W
+        inputs_max_idx = torch.argmax(inputs, 1, keepdim=True).to(device)
+        inputs_one_hot = torch.FloatTensor(inputs.shape).to(device)
+        inputs_one_hot.zero_()
+        inputs_one_hot.scatter_(1, inputs_max_idx, 1)
+        # target: N, H, W -> H, C, H, W
+        target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
+        target_one_hot = make_one_hot(target) # N, H, W -> N, C, H, W
+        return self.DiceLoss(inputs_one_hot, target_one_hot)
+
+
+class DiceCrossEntropyLoss(nn.Module):
+    def __init__(self):
+        super(DiceCrossEntropyLoss, self).__init__()
+        self.CrossEntropyLoss = nn.CrossEntropyLoss()
+
+    def forward(self, inputs, target): # N, C, H, W # N, H, W
+        # cross entropy loss
+        ce_loss = self.CrossEntropyLoss(inputs, target)
+
+        # dice loss
+        # inputs: N, C(probs), H, W -> N, C(max_one_hot), H, W
+        inputs_max_idx = torch.argmax(inputs, 1, keepdim=True).to(device)
+        inputs_one_hot = torch.FloatTensor(inputs.shape).to(device)
+        inputs_one_hot.zero_()
+        inputs_one_hot.scatter_(1, inputs_max_idx, 1)
+        # target: N, H, W -> H, C, H, W
+        target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
+        target_one_hot = make_one_hot(target) # N, H, W -> N, C, H, W
+        numerator = 2 * torch.sum(inputs_one_hot * target_one_hot)
+        denominator = torch.sum(inputs_one_hot + target_one_hot)
+        dice_loss = 1 - (numerator + 1) / (denominator + 1)
+
+
+        return ce_loss*1 + dice_loss*10
+
+
+def _iou(pred, target, size_average = True):
+
+    b = pred.shape[0]
+    IoU = 0.0
+    for i in range(0,b):
+        #compute the IoU of the foreground
+        Iand1 = torch.sum(target[i,:,:,:]*pred[i,:,:,:])
+        Ior1 = torch.sum(target[i,:,:,:]) + torch.sum(pred[i,:,:,:])-Iand1
+        IoU1 = Iand1/Ior1
+
+        #IoU loss is (1-IoU1)
+        IoU = IoU + (1-IoU1)
+
+    return IoU/b
+
+
+class IOU(torch.nn.Module):
+    def __init__(self, size_average = True):
+        super(IOU, self).__init__()
+        self.size_average = size_average
+
+    def forward(self, pred, target):
         target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
         target = make_one_hot(target)
-        numerator = 2 * torch.sum(inputs * target)
-        denominator = torch.sum(inputs + target)
-        return 1 - (numerator + 1) / (denominator + 1)
+        return _iou(pred, target, self.size_average)
+
+def IOU_loss(pred,label):
+    iou_loss = IOU(size_average=True)
+    iou_out = iou_loss(pred, label)
+    print("iou_loss:", iou_out.data.cpu().numpy())
+    return iou_out
 
 
 _criterion_entrypoints = {
@@ -332,7 +398,9 @@ _criterion_entrypoints = {
     'HausdorffDT': HausdorffDTLoss,
     'soft_cross_entropy': softCrossEntropy,
     'focal_softCE': focal_softCrossEntropy,
-    'dice': DiceLoss
+    'dice': DiceLoss,
+    'dice_cross_entropy': DiceCrossEntropyLoss,
+    'iou': IOU,
 }
 
 

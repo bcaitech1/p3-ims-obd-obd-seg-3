@@ -103,6 +103,22 @@ class DeepLapV3PlusEfficientnetB5(nn.Module):
         return self.model(x)
 
 
+class DeepLapV3PlusEfficientnetB7NoisyStudent(nn.Module):
+    ENCODER = 'timm-efficientnet-b7'
+    ENCODER_WEIGHTS = 'noisy-student'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
 class DeepLapV3PlusResnext50(nn.Module):
     ENCODER = 'se_resnext50_32x4d'
     ENCODER_WEIGHTS = 'imagenet'
@@ -301,6 +317,23 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
             encoder_weights=self.ENCODER_WEIGHTS,
             classes=12,
             # aux_params=aux_params,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class DeepLapV3PlusRegnety064Imagenet(nn.Module):
+    ENCODER = 'timm-regnety_064'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
         )
 
     def forward(self, x):
