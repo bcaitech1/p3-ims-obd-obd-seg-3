@@ -58,6 +58,7 @@ def train(data_dir, model_dir, args):
 
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
+
     if args.aug:
         train_transform = A.Compose([
             A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
@@ -115,6 +116,7 @@ def train(data_dir, model_dir, args):
             num_classes=num_classes
         ).to(device)
         model = torch.nn.DataParallel(model)
+
     else:
         if os.path.exists(os.path.join(model_dir, args.name, 'latest.pth')):
             model = load_model(model_dir, num_classes, device, args, args.model,'train', 'latest.pth').to(device)
@@ -135,8 +137,13 @@ def train(data_dir, model_dir, args):
         lr=args.lr,
         weight_decay=1e-6
     )
-    # scheduler = StepLR(optimizer, args.lr_decay_step, gamma=0.5)
-
+    if args.scheduler == 'RP':
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,mode='min', factor=0.1, patience=3,
+                                                  threshold=1e-4, threshold_mode='rel', cooldown=0,
+                                                  min_lr=0, eps=1e-8, verbose=False)
+    if args.schduler == 'WSCA':
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, 1000, T_mult=1, eta_min=0,
+                                                                         last_epoch=-1, verbose=False)
     # -- logging
     start_time = time.time()
     logger = SummaryWriter(log_dir=save_dir)
@@ -165,19 +172,21 @@ def train(data_dir, model_dir, args):
         train_cnt = 0
         train_mIoU_list = []
         for idx, (images, masks, _) in enumerate(train_loader):
+            images = torch.stack(images)  # (batch, channel, height, width)
+            masks = torch.stack(masks).long()  # (batch, channel, height, width)
 
             # copyblob을 만들기어 주기 위한 loop
             if args.copyblob:
-                for i in range(images.size()[0]):
-                    rand_idx = np.random.randint(inputs.size()[0])
+                for i in range(args.batch_size):
+                    rand_idx = np.random.randint(args.batch_size)
                     # category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
                     # random(?) --> background(0)
-                    copyblob(src_img=inputs[i], src_mask=labels[i], dst_img=inputs[rand_idx], dst_mask=labels[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=0)
+                    copyblob(src_img=images[i], src_mask=masks[i], dst_img=images[rand_idx], dst_mask=masks[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=0)
                     # random(?) --> paper(3)
-                    copyblob(src_img=inputs[i], src_mask=labels[i], dst_img=inputs[rand_idx], dst_mask=labels[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=3)
+                    copyblob(src_img=images[i], src_mask=masks[i], dst_img=images[rand_idx], dst_mask=masks[rand_idx], src_class=np.random.choice([2,4,5,6,7,8], 1).item(), dst_class=3)
 
-            images = torch.stack(images)        # (batch, channel, height, width)
-            masks = torch.stack(masks).long()   # (batch, channel, height, width)
+            # images = torch.stack(images)        # (batch, channel, height, width)
+            # masks = torch.stack(masks).long()   # (batch, channel, height, width)
             images, masks = images.to(device), masks.to(device)
 
             if args.model == "GSCNN":
@@ -189,7 +198,8 @@ def train(data_dir, model_dir, args):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            if args.scheduler != None:
+                scheduler.step()
             train_loss += loss
             train_cnt += 1
 
@@ -275,7 +285,7 @@ if __name__ == '__main__':
     # Resize도 현재는 적용안되어 있음 (원본 size 크니깐 resize 필요해보임) Crop은 조심. 
     # parser.add_argument("--resize", nargs="+", type=list, default=[128, 96], help='resize size for image when training')
     parser.add_argument('--batch_size', type=int, default=8, help='input batch size for training (default: 64)')
-    parser.add_argument('--valid_batch_size', type=int, default=16, help='input batch size for validing (default: 1000)')
+    parser.add_argument('--valid_batch_size', type=int, default=8, help='input batch size for validing (default: 1000)')
     parser.add_argument('--model', type=str, default='FCN8s', help='model type (default: BaseModel)')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer type (default: SGD)')
     parser.add_argument('--lr', type=float, default=1e-4, help='learning rate (default: 1e-3)')
@@ -289,6 +299,8 @@ if __name__ == '__main__':
     parser.add_argument('--lr_decay_step', type=int, default=20, help='learning rate scheduler deacy step (default: 20)')
     parser.add_argument('--log_interval', type=int, default=20, help='how many batches to wait before logging training status')
     parser.add_argument('--name', default='exp', help='model save at {SM_MODEL_DIR}/{name}')
+    parser.add_argument('--scheduler', type=str, default=None, help='WRCA : CosineAnnealingWarmRestarts, RP : ReduceLROnPlateau')
+
 
     # Container environment
     parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_TRAIN', '/opt/ml/input/data'))
@@ -331,8 +343,8 @@ if __name__ == '__main__':
     # args.model = 'DeepLapV3PlusResnext101'
     # args.name = "DeepLapV3PlusResnext101-epoch20"
 
-    # args.model = 'DeepLapV3PlusEfficientnetB0NoisyStudent'
-    # args.name = "cutmix(rand)_DeepLabV3Plus_Effi_B0_NoisyStudent"
+    args.model = 'R50_ViT'
+    args.name = "R50_ViT"
     # args.load_model = True
 
     train(data_dir, model_dir, args)
