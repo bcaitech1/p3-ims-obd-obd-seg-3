@@ -323,7 +323,7 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
         return self.model(x)
 
 
-class DeepLapV3PlusRegNetImagenet(nn.Module):
+class DeepLapV3PlusRegnety064Imagenet(nn.Module):
     ENCODER = 'timm-regnety_064'
     ENCODER_WEIGHTS = 'imagenet'
 
