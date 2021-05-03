@@ -48,7 +48,7 @@ class CustomDataset(Dataset):
         
     def __getitem__(self, index: int):
         # # cutmix용 index2 (범위안에서 랜덤으로 한장 뽑기), 근데 random 보다 class 별로 확률을 주는 것도 좋을 듯
-        # index2 = np.random.randint(0, self.image_num)
+        index2 = np.random.randint(0, self.image_num)
 
         # dataset이 index되어 list처럼 동작
         image_id = self.coco.getImgIds(imgIds=index)
@@ -107,21 +107,22 @@ class CustomDataset(Dataset):
                 if cutmix_p > 0.7:
                     h_cut_size = np.random.randint(70, 300)
                     w_cut_size = np.random.randint(70, 300)
-                    start_h1, start_w1 = np.random.randint(0, 516 - h_cut_size - 10), np.random.randint(0, 516 - w_cut_size - 10) # 잘라서 0으로
-                    start_h2, start_w2 = np.random.randint(0, 516 - h_cut_size - 10), np.random.randint(0, 516 - w_cut_size - 10) # 자르기 위해 나머지를 0으로
+                    start_h, start_w = np.random.randint(0, 516 - h_cut_size - 10), np.random.randint(0, 516 - w_cut_size - 10) # 잘라서 0으로
+                    # start_h2, start_w2 = np.random.randint(0, 516 - h_cut_size - 10), np.random.randint(0, 516 - w_cut_size - 10) # 자르기 위해 나머지를 0으로
 
-                    masks[start_h1 : start_h1 + h_cut_size, start_w1 : start_w1 + w_cut_size] = 0
-                    masks2[:start_h2,:]= 0
-                    masks2[start_h2 + h_cut_size:,:]= 0
-                    masks2[:,:start_w2]= 0
-                    masks2[:,start_w2 + w_cut_size:]= 0
+                    masks[start_h : start_h + h_cut_size, start_w : start_w + w_cut_size] = 0
+                    masks2[:start_h,:]= 0
+                    masks2[start_h + h_cut_size:,:]= 0
+                    masks2[:,:start_w]= 0
+                    masks2[:,start_w + w_cut_size:]= 0
                     masks = masks + masks2
-                    images[start_h1 : start_h1 + h_cut_size, start_w1 : start_w1 + w_cut_size, :] = 0
-                    images2[:start_h2,:,:]= 0
-                    images2[start_h2 + h_cut_size:,:,:]= 0
-                    images2[:,:start_w2,:]= 0
-                    images2[:,start_w2 + w_cut_size:,:]= 0
+                    images[start_h : start_h + h_cut_size, start_w : start_w + w_cut_size, :] = 0
+                    images2[:start_h,:,:]= 0
+                    images2[start_h + h_cut_size:,:,:]= 0
+                    images2[:,:start_w,:]= 0
+                    images2[:,start_w + w_cut_size:,:]= 0
                     images = images + images2
+                    
 
             # transform -> albumentations 라이브러리 활용
             if self.transform is not None:
