@@ -323,6 +323,29 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
         return self.model(x)
 
 
+class DeepLapV3PlusResnestImagenet(nn.Module):
+    ENCODER = 'timm-resnest50d'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        # aux_params=dict(
+        #     pooling='avg',             # one of 'avg', 'max'
+        #     dropout=0.5,               # dropout ratio, default is None
+        #     activation='sigmoid',      # activation function, default is None
+        #     classes=12,                 # define number of output labels
+        # )
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+            # aux_params=aux_params,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
 class UnetPlusPlusResnext50Swsl(nn.Module):
     ENCODER = 'resnext50_32x4d'
     ENCODER_WEIGHTS = 'swsl'
