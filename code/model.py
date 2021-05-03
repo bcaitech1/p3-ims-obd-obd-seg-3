@@ -323,22 +323,6 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
         return self.model(x)
 
 
-class DeepLapV3PlusResnestImagenet(nn.Module):
-    ENCODER = 'timm-resnest50d'
-    ENCODER_WEIGHTS = 'imagenet'
-
-    def __init__(self, num_classes):
-        super().__init__()
-
-        self.model = smp.DeepLabV3Plus(
-            encoder_name=self.ENCODER,
-            encoder_weights=self.ENCODER_WEIGHTS,
-            classes=12,
-        )
-
-    def forward(self, x):
-        return self.model(x)
-
 class DeepLapV3PlusRegNetImagenet(nn.Module):
     ENCODER = 'timm-regnety_064'
     ENCODER_WEIGHTS = 'imagenet'
