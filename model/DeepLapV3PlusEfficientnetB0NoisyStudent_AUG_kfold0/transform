@@ -1,0 +1,12 @@
+Compose([
+  CropNonEmptyMaskIfExists(always_apply=False, p=0.5, height=200, width=200, ignore_values=None, ignore_channels=None),
+  GridDistortion(always_apply=False, p=0.5, num_steps=5, distort_limit=(-0.3, 0.3), interpolation=1, border_mode=4, value=None, mask_value=None),
+  HorizontalFlip(always_apply=False, p=0.5),
+  RandomBrightnessContrast(always_apply=False, p=0.5, brightness_limit=(-0.2, 0.2), contrast_limit=(-0.2, 0.2), brightness_by_max=True),
+  Resize(always_apply=False, p=1, height=512, width=512, interpolation=1),
+  ToTensorV2(always_apply=True, p=1.0, transpose_mask=False),
+], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})
+
+Compose([
+  ToTensorV2(always_apply=True, p=1.0, transpose_mask=False),
+], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})
