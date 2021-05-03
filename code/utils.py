@@ -52,8 +52,8 @@ def seed_worker(_worker_id):
     np.random.seed(worker_seed)
     random.seed(worker_seed)
 
-def load_model(model_dir, num_classes, device, args, mode='train', file_name='best.pth'):
-    model_cls = getattr(import_module("model"), args.model)
+def load_model(model_dir, num_classes, device, args, model_name, mode='train', file_name='best.pth'):
+    model_cls = getattr(import_module("model"), model_name)
     model = model_cls(
         num_classes=num_classes
     )
@@ -65,6 +65,7 @@ def load_model(model_dir, num_classes, device, args, mode='train', file_name='be
         model_path = os.path.join(model_dir, args.name, file_name)
     elif mode == 'inference':
         model_path = os.path.join(model_dir, file_name)
+    print(f'loading model from {model_path}')
     model.load_state_dict(torch.load(model_path, map_location=device))
 
     return model
