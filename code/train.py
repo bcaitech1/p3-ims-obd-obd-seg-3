@@ -141,7 +141,7 @@ def train(data_dir, model_dir, args):
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer,mode='min', factor=0.1, patience=3,
                                                   threshold=1e-4, threshold_mode='rel', cooldown=0,
                                                   min_lr=0, eps=1e-8, verbose=False)
-    if args.schduler == 'WSCA':
+    if args.scheduler == 'WSCA':
         scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, 1000, T_mult=1, eta_min=0,
                                                                          last_epoch=-1, verbose=False)
     # -- logging
@@ -340,11 +340,8 @@ if __name__ == '__main__':
     data_dir = args.data_dir
     model_dir = args.model_dir
 
-    # args.model = 'DeepLapV3PlusResnext101'
-    # args.name = "DeepLapV3PlusResnext101-epoch20"
-
-    args.model = 'R50_ViT'
-    args.name = "R50_ViT"
-    # args.load_model = True
+    args.model = 'DeepLapV3PlusRegnety002Imagenet'
+    args.name = "DeepLapV3PlusRegnety002Imagenet"
+    # args.criterion = "rovasz"
 
     train(data_dir, model_dir, args)
