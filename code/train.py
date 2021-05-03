@@ -63,7 +63,7 @@ def train(data_dir, model_dir, args):
         A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
                          always_apply=False, p=0.5),
         A.HorizontalFlip(p=0.5),
-        A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
+        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
         A.Resize(512, 512),
         # Normalized
         ToTensorV2(),
