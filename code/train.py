@@ -59,13 +59,13 @@ def train(data_dir, model_dir, args):
     # 짜다가 꼬여서 포기 albumentation용으로 Class 정의 변경해 줘야함
     # # validation 다른 aug 적용하려면 datset.py 수정 필요
     train_transform = A.Compose([
-        # A.OneOf([
-        #     A.CropNonEmptyMaskIfExists(256, 256, p=1),
-        #     A.CropNonEmptyMaskIfExists(400, 400, p=1),
-        # ], p=0.5),
+        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+        A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
+                         always_apply=False, p=0.5),
         A.HorizontalFlip(p=0.5),
-        A.Rotate(30),
-        A.Resize(512,512),
+        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
+        A.Resize(512, 512),
+        # Normalized
         ToTensorV2(),
     ])
     val_transform = A.Compose([

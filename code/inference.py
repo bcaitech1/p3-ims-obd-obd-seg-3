@@ -13,7 +13,7 @@ from albumentations.pytorch import ToTensorV2
 
 from tqdm.auto import tqdm
 from utils import load_model
-
+import torchvision.transforms as transforms
 
 # collate_fn needs for batch
 def collate_fn(batch):
@@ -37,9 +37,14 @@ def inference(data_dir, model_dir, output_dir, args):
     test_path = os.path.join(data_dir, 'test.json')
 
     test_transform = A.Compose([
-        ToTensorV2()
+        A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
+        A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
+                         always_apply=False, p=0.5),
+        A.HorizontalFlip(p=0.5),
+        A.Resize(512, 512),
+        # Normalized
+        ToTensorV2(),
     ])
-
     # test dataset
     category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic',
                       'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
@@ -53,7 +58,8 @@ def inference(data_dir, model_dir, output_dir, args):
                                               pin_memory=use_cuda,
                                               drop_last=False,
                                               )
-
+    print(test_loader.dataset)
+    print(test_loader.dataset.mean_std)
     size = 256
     transform = A.Compose([A.Resize(256, 256)])
     file_name_list = []
@@ -63,16 +69,35 @@ def inference(data_dir, model_dir, output_dir, args):
     with torch.no_grad():
         for step, (imgs, image_infos) in enumerate(test_loader):
             print(f"step : {step} / {len(test_loader)}")
+            if tta:
+                for tta in range(args.tta):
+                    for idx, img in enumerate(imgs):
+                        img = np.array(img)
+                        img = img.reshape(512, 512, 3)
+                        transformed = test_transform(image=img)
+                        img = transformed["image"]
 
-            # inference (512 x 512)
-            outs = models[0](torch.stack(imgs).to(device))
-            outs = softmax(outs)
-            for i in range(1, len(models)):
-                outs += softmax(models[i](torch.stack(imgs).to(device)))
+                        img = transforms.Normalize(*test_loader.dataset.mean_std)(img)
+                        imgs[idx] = img
+                    # inference (512 x 512)
+                    tta_outs = models[0](torch.stack(imgs).to(device))
+                    tta_outs = softmax(tta_outs)
+                    for i in range(1, len(models)):
+                        tta_outs += softmax(models[i](torch.stack(imgs).to(device)))
+                    if tta == 0:
+                        outs = tta_outs
+                    else:
+                        outs += tta_outs
+            else:
+                outs = models[0](torch.stack(imgs).to(device))
+                outs = softmax(outs)
+                for i in range(1, len(models)):
+                    outs += softmax(models[i](torch.stack(imgs).to(device)))
             oms = torch.argmax(outs.squeeze(), dim=1).detach().cpu().numpy()
             # resize (256 x 256)
             temp_mask = []
             for img, mask in zip(np.stack(imgs), oms):
+                # print(f'img shape: {img.shape}')
                 transformed = transform(image=img, mask=mask)
                 mask = transformed['mask']
                 temp_mask.append(mask)
@@ -134,7 +159,7 @@ if __name__ == '__main__':
                                                                         '/opt/ml/model/DeepLapV3PlusEfficientnetB5NoisyStudent'))
     parser.add_argument('--output_dir', type=str,
                         default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/code/submission'))
-
+    parser.add_argument('--tta', type=int, default=0)
     args = parser.parse_args()
 
     data_dir = args.data_dir
