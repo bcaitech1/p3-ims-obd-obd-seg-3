@@ -65,7 +65,7 @@ def inference(data_dir, model_dir, output_dir, args):
     with torch.no_grad():
         for step, (imgs, image_infos) in enumerate(test_loader):
             print(f"step : {step} / {len(test_loader)}")
-            if tta:
+            if args.tta:
                 for tta in range(args.tta):
                     for idx, img in enumerate(imgs):
                         img = np.array(img)
