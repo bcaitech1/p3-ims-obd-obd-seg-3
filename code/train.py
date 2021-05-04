@@ -311,7 +311,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--train', type=str, default='train.json')
     parser.add_argument('--val', type=str, default='val.json')
-    parser.add_argument('--aug', type=bool, default=False)
+    parser.add_argument('--aug', type=bool, default=True)
     args = parser.parse_args()
 
     seed_everything(args.seed)
