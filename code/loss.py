@@ -393,15 +393,18 @@ class RovaszLoss(nn.Module):
         self.Rovasz = LOVASZ
 
     def forward(self, inputs, target):
-        # inputs: N, C(probs), H, W -> N, C(max_one_hot), H, W
-        # inputs_max_idx = torch.argmax(inputs, 1, keepdim=True).to(device)
-        # inputs_one_hot = torch.FloatTensor(inputs.shape).to(device)
-        # inputs_one_hot.zero_()
-        # inputs_one_hot.scatter_(1, inputs_max_idx, 1)
-        # target: N, H, W -> H, C, H, W
-        # target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
-        # target_one_hot = make_one_hot(target) # N, H, W -> N, C, H, W
         return self.Rovasz.lovasz_softmax(inputs, target)
+
+class RovaszCrossEntropyLoss(nn.Module):
+    def __init__(self):
+        super(RovaszCrossEntropyLoss, self).__init__()
+        self.Rovasz = LOVASZ
+        self.CrossEntropyLoss = nn.CrossEntropyLoss()
+
+    def forward(self, inputs, target):
+        lovasz_loss = self.Rovasz.lovasz_softmax(inputs, target)
+        ce_loss = self.CrossEntropyLoss(inputs, target)
+        return lovasz_loss + ce_loss
 
 
 _criterion_entrypoints = {
@@ -420,6 +423,7 @@ _criterion_entrypoints = {
     'dice_cross_entropy': DiceCrossEntropyLoss,
     'iou': IOU,
     'rovasz': RovaszLoss,
+    'rovasz_cross_entropy': RovaszCrossEntropyLoss
 }
 
 
