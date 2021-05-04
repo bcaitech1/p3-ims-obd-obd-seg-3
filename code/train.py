@@ -62,8 +62,6 @@ def train(data_dir, model_dir, args):
     if args.aug:
         train_transform = A.Compose([
             A.CropNonEmptyMaskIfExists(200, 200, p=0.5),
-            A.GridDistortion(num_steps=5, distort_limit=0.3, interpolation=1, border_mode=4, value=None, mask_value=None,
-                             always_apply=False, p=0.5),
             A.HorizontalFlip(p=0.5),
             # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
             A.Resize(512, 512),
@@ -278,7 +276,7 @@ if __name__ == '__main__':
 
     # Data and model checkpoints directories
     parser.add_argument('--seed', type=int, default=42, help='random seed (default: 42)')
-    parser.add_argument('--epochs', type=int, default=30 , help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=20 , help='number of epochs to train (default: 1)')
     parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: MaskBaseDataset)')
     parser.add_argument('--augmentation', type=str, default='BaseAugmentation', help='data augmentation type (default: BaseAugmentation)')
 
@@ -340,8 +338,8 @@ if __name__ == '__main__':
     data_dir = args.data_dir
     model_dir = args.model_dir
 
-    args.model = 'DeepLapV3PlusRegnety002Imagenet'
-    args.name = "DeepLapV3PlusRegnety002Imagenet"
+#     args.model = 'DeepLapV3PlusRegnety002Imagenet'
+#     args.name = "DeepLapV3PlusRegnety002Imagenet"
     # args.criterion = "rovasz"
 
     train(data_dir, model_dir, args)
