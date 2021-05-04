@@ -291,7 +291,7 @@ if __name__ == '__main__':
     ## 이거 수정해서 validation 나누는 기준 수정 필요
     parser.add_argument('--val_ratio', type=float, default=0.2, help='ratio for validaton (default: 0.2)')
 
-    parser.add_argument('--criterion', type=str, default='cross_entropy', help='criterion type (default: cross_entropy)')
+    parser.add_argument('--criterion', type=str, default='rovasz_cross_entropy', help='criterion type (default: cross_entropy)')
 
     ### scheduler는 비활성화 해둠
     parser.add_argument('--lr_decay_step', type=int, default=20, help='learning rate scheduler deacy step (default: 20)')
@@ -307,7 +307,7 @@ if __name__ == '__main__':
 
     # Special Augmentations
     parser.add_argument('--copyblob', type=bool, default=False, help='copyblob on')
-    parser.add_argument('--cutmix', type=bool, default=False, help='cutmix on (default: False)')
+    parser.add_argument('--cutmix', type=bool, default=True, help='cutmix on (default: False)')
 
     parser.add_argument('--train', type=str, default='train.json')
     parser.add_argument('--val', type=str, default='val.json')
