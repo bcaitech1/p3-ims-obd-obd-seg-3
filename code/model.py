@@ -323,6 +323,23 @@ class DeepLapV3PlusInceptionv4Background(nn.Module):
         return self.model(x)
 
 
+class DeepLapV3PlusRegnety002Imagenet(nn.Module):
+    ENCODER = 'timm-regnety_002'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
 class DeepLapV3PlusRegnety064Imagenet(nn.Module):
     ENCODER = 'timm-regnety_064'
     ENCODER_WEIGHTS = 'imagenet'
@@ -338,6 +355,59 @@ class DeepLapV3PlusRegnety064Imagenet(nn.Module):
 
     def forward(self, x):
         return self.model(x)
+
+
+class DeepLapV3PlusRegnetx160Imagenet(nn.Module):
+    ENCODER = 'timm-regnetx_160'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+
+class DeepLapV3PlusRegnety160Imagenet(nn.Module):
+    ENCODER = 'timm-regnety_160'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
+class DeepLapV3PlusRegnety320Imagenet(nn.Module):
+    ENCODER = 'timm-regnety_320'
+    ENCODER_WEIGHTS = 'imagenet'
+
+    def __init__(self, num_classes):
+        super().__init__()
+
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
 
 
 class UnetPlusPlusResnext50Swsl(nn.Module):
