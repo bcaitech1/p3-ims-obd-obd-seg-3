@@ -3,6 +3,24 @@ import torch.optim as optim
 from torchvision import models
 from torchvision.models import vgg16
 import segmentation_models_pytorch as smp
+from TransUNet.networks.vit_seg_modeling import VisionTransformer as ViT_seg
+from TransUNet.networks.vit_seg_modeling import CONFIGS as CONFIGS_ViT_seg
+import numpy as np
+
+class R50_ViT(nn.Module):
+    def __init__(self, num_classes):
+        super().__init__()
+        config_vit = CONFIGS_ViT_seg['R50-ViT-B_16']
+        config_vit.n_classes = 12
+        config_vit.n_skip = 3
+        config_vit.pretrained_path = './R50+ViT-B_16.npz'
+        config_vit.transformer.dropout_rate = 0.2
+
+        self.model = ViT_seg(config_vit, img_size=512, num_classes=num_classes)
+        self.model.load_from(weights=np.load(config_vit.pretrained_path))
+
+    def forward(self, x):
+        return self.model(x)
 
 
 class FCN8s(nn.Module):
