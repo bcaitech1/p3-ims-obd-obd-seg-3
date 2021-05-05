@@ -121,6 +121,22 @@ class DeepLapV3PlusEfficientnetB5(nn.Module):
         return self.model(x)
 
 
+class DeepLapV3PlusEfficientnetB4NoisyStudent(nn.Module):
+    ENCODER = 'timm-efficientnet-b4'
+    ENCODER_WEIGHTS = 'noisy-student'
+
+    def __init__(self, num_classes):
+        super().__init__()
+        self.model = smp.DeepLabV3Plus(
+            encoder_name=self.ENCODER,
+            encoder_weights=self.ENCODER_WEIGHTS,
+            classes=12,
+        )
+
+    def forward(self, x):
+        return self.model(x)
+
+
 class DeepLapV3PlusEfficientnetB7NoisyStudent(nn.Module):
     ENCODER = 'timm-efficientnet-b7'
     ENCODER_WEIGHTS = 'noisy-student'
