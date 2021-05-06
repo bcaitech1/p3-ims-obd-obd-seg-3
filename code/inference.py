@@ -19,6 +19,8 @@ import torchvision.transforms as transforms
 def collate_fn(batch):
     return tuple(zip(*batch))
 
+def get_model_dir(folder_path):
+    return '/opt/ml/p3-ims-obd-obd-seg-3/model/' + folder_path
 
 @torch.no_grad()
 def inference(data_dir, model_dir, output_dir, args):
@@ -27,7 +29,7 @@ def inference(data_dir, model_dir, output_dir, args):
 
     num_classes = CustomDataset.num_classes  # 18
     model_names = args.model.split(',')
-    model_dirs = model_dir.split(',')
+    model_dirs = list(map(get_model_dir, model_dir.split(',')))
     models = []
     for model_name, model_dir in zip(model_names, model_dirs):
         models.append(load_model(model_dir, num_classes, device, args, model_name, 'inference').to(device))
@@ -62,34 +64,34 @@ def inference(data_dir, model_dir, output_dir, args):
     preds_array = np.empty((0, size * size), dtype=np.long)
     softmax = torch.nn.Softmax(dim=1)
     print("Calculating inference results..")
+    weights = list(map(float, args.weights.split(',')))
     with torch.no_grad():
         for step, (imgs, image_infos) in enumerate(test_loader):
             print(f"step : {step} / {len(test_loader)}")
-            if args.tta:
-                for tta in range(args.tta):
-                    for idx, img in enumerate(imgs):
-                        img = np.array(img)
-                        img = img.reshape(512, 512, 3)
-                        transformed = test_transform(image=img)
-                        img = transformed["image"]
 
-                        img = transforms.Normalize(*test_loader.dataset.mean_std)(img)
-                        imgs[idx] = img
-                    # inference (512 x 512)
-                    tta_outs = models[0](torch.stack(imgs).to(device))
-                    tta_outs = softmax(tta_outs)
-                    for i in range(1, len(models)):
-                        tta_outs += softmax(models[i](torch.stack(imgs).to(device)))
-                    if tta == 0:
-                        outs = tta_outs
-                    else:
-                        outs += tta_outs
-            else:
-                outs = models[0](torch.stack(imgs).to(device))
-                outs = softmax(outs)
-                for i in range(1, len(models)):
-                    outs += softmax(models[i](torch.stack(imgs).to(device)))
+            images = torch.stack(imgs)  # (batch, channel, height, width)
+            images = images.to(device)
+            images2 = torch.nn.UpsamplingBilinear2d(size=(256, 256))(images)
+            images3 = images
+            images5 = torch.nn.UpsamplingBilinear2d(size=(1024, 1024))(images)
+            outputs2 = models[0](images2)
+            outputs2 = torch.nn.UpsamplingBilinear2d(size=(512, 512))(outputs2)
+            outputs3 = models[0](images3)
+            outputs5 = models[0](images5)
+            outputs5 = torch.nn.UpsamplingBilinear2d(size=(512, 512))(outputs5)
+            outputs = (outputs2 * 0.3) + (outputs3 * 0.4) + (outputs5 * 0.3)
+            outs = softmax(outputs) * weights[0]
+            for i in range(1, len(models)):
+                outputs2 = models[i](images2)
+                outputs2 = torch.nn.UpsamplingBilinear2d(size=(512, 512))(outputs2)
+                outputs3 = models[i](images3)
+                outputs5 = models[i](images5)
+                outputs5 = torch.nn.UpsamplingBilinear2d(size=(512, 512))(outputs5)
+                outputs = (outputs2 * 0.3) + (outputs3 * 0.4) + (outputs5 * 0.3)
+                outs += softmax(outputs) * weights[i]
             oms = torch.argmax(outs.squeeze(), dim=1).detach().cpu().numpy()
+
+
             # resize (256 x 256)
             temp_mask = []
             for img, mask in zip(np.stack(imgs), oms):
@@ -156,6 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str,
                         default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/code/submission'))
     parser.add_argument('--tta', type=int, default=0)
+    parser.add_argument('--weights', type=str, default='')
     args = parser.parse_args()
 
     data_dir = args.data_dir
