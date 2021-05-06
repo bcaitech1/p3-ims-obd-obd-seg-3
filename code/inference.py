@@ -39,7 +39,7 @@ def inference(data_dir, model_dir, output_dir, args):
     test_path = os.path.join(data_dir, 'test.json')
 
     test_transform = A.Compose([
-        A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
+        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
         # Normalized
         ToTensorV2(),
     ])
