@@ -59,6 +59,9 @@ input/
 
 # pipeline
 
+### Data
+데이터는 상위 폴더 README에 정리되어 있음. [LINK](#../README.md)
+
 #### Augmentation
 ```
 bash scripts/colorization.sh
