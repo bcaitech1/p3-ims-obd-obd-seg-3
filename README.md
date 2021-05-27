@@ -24,7 +24,8 @@
 
 ## 데이터 형식
 
-- **COCO Format**
+[**COCO Format**](#./COCO.png)
+
 <br/>
 annotation file은 coco format 으로 이루어져 있습니다.<br/>
 coco format은 크게 2가지 (images, annotations)의 정보를 가지고 있습니다.<br/><br/>
