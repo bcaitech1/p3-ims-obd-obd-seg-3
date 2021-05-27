@@ -59,7 +59,7 @@ input/
 
 # pipeline
 
-![pipeline](#./pipeline.png)
+![pipeline](https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/detection/pipeline.png)
 
 ### Data
 데이터는 상위 폴더 [README](https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/README.md)에 정리되어 있음.
