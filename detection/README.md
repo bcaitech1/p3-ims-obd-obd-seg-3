@@ -5,9 +5,6 @@
 # VumbleBot - BaselineCode  <!-- omit in toc -->
 
 - [File Structure](#file-structure)
-  - [Config](#config)
-  - [mmdet](#mmdet)
-  - [train jupyter baseline code](#baseline_code)
 - [pipeline](#pipeline)
   - [Augmentation](#augmentation)
   - [Modeling](#Modeling)
