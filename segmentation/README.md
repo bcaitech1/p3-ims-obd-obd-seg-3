@@ -134,13 +134,6 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 
 #### SWA Scheduler
 
-- Cross Entropy Loss
-- Weighted Cross Entropy Loss
-- Dice Loss + Cross Entropy Loss
-- Lovasz Loss
-- Lovasz Loss + Cross Entropy Loss
-- ReduceLROnPlateau Scheduler
-
 <br/>
 
 #### Modeling
@@ -162,34 +155,16 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 
 #### TTA
 
-- Cross Entropy Loss
-- Weighted Cross Entropy Loss
-- Dice Loss + Cross Entropy Loss
-- Lovasz Loss
-- Lovasz Loss + Cross Entropy Loss
-- ReduceLROnPlateau Scheduler
 
 <br/>
 
 #### MultiScale
 
-- Cross Entropy Loss
-- Weighted Cross Entropy Loss
-- Dice Loss + Cross Entropy Loss
-- Lovasz Loss
-- Lovasz Loss + Cross Entropy Loss
-- ReduceLROnPlateau Scheduler
 
 <br/>
 
 #### Softmax Temperature
 
-- Cross Entropy Loss
-- Weighted Cross Entropy Loss
-- Dice Loss + Cross Entropy Loss
-- Lovasz Loss
-- Lovasz Loss + Cross Entropy Loss
-- ReduceLROnPlateau Scheduler
 
 <br/>
 
