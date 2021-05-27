@@ -9,12 +9,12 @@
   - [mmdet](#mmdet)
   - [train jupyter baseline code](#baseline_code)
 - [pipeline](#pipeline)
-  - [Augmentation](augmentation)
-  - [Modeling](Modeling)
-  - [Loss](loss)
-  - [SWA](SWA)
-  - [Multiscale](multiscale)
-  - [Ensemble](ensemble)
+  - [Augmentation](#augmentation)
+  - [Modeling](#Modeling)
+  - [Loss](#loss)
+  - [SWA](#SWA)
+  - [Multiscale](#multiscale)
+  - [Ensemble](#ensemble)
 - [Results](results)
 - [Environment](#environment)
   - [Hardware](#hardware)
@@ -59,37 +59,39 @@ input/
 
 # pipeline
 
-Augmentation
+#### Augmentation
 ```
 bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
-Train
+#### Train
 ```
 bash scripts/train_detectors.sh
 bash scripts/train_universenet.sh
 ```
-Loss
+#### Loss
 ```
 bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
-SWA
+#### SWA
 ```
 bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
-Multiscale
+#### Multiscale
 ```
 bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
-Ensemble
+#### Ensemble
 ```
 bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
-Submission preparing
+#### Submission preparing
+```
+```
 
 <br/><br/>
 
