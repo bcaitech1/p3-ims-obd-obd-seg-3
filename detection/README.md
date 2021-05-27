@@ -10,30 +10,43 @@
 # 목차 
 
 - [File Structure](#file-structure)
-- [pipeline](#pipeline)
-  - [Augmentation](#augmentation)
-  - [Modeling](#Modeling)
-  - [Loss](#loss)
-  - [SWA](#SWA)
-  - [Multiscale](#multiscale)
-  - [Ensemble](#ensemble)
-- [Results](#results)
-- [Environment](#environment)
-  - [Hardware](#hardware)
-  - [Software](#software)
 - [Simple Use](#simple-use)
   - [Requirements](#requirements)
   - [Install packages](#install-packages)
   - [Train](#train)
   - [Inference](#inference)
+- [pipeline](#pipeline)
+  - [Augmentation](#augmentation)
+  - [Train](#train)
+  - [Loss](#loss)
+  - [SWA](#SWA)
+  - [Multiscale](#multiscale)
+  - [Ensemble](#ensemble)
+- [Results](#results)
+  - [Model](#model)
+  - [NMS](#nms)
+  - [MultiScale](#multiscale)
+- [Environment](#environment)
+  - [Hardware](#hardware)
+  - [Software](#software)
+
 
 - [Reference Citation](#reference-citation)
 
 <br/><br/>
 
-## File Structure  
+## Simple Use
 
-### Input
+### Requirements
+
+### Install packages
+
+### Train
+
+### Inference
+
+<br/><br/>
+## File Structure  
   
 ```
 /
