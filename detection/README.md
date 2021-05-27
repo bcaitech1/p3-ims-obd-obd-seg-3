@@ -15,7 +15,7 @@
   - [SWA](#SWA)
   - [Multiscale](#multiscale)
   - [Ensemble](#ensemble)
-- [Results](results)
+- [Results](#results)
 - [Environment](#environment)
   - [Hardware](#hardware)
   - [Software](#software)
@@ -115,26 +115,27 @@ Software:
 
 <br/><br/>
 
-## Results
+# Results
 
-| Method                 | AP     | F-Score | x error near (m) | x error far (m) | z error near (m) | z error far (m) |
-|------------------------|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
-| 3D-LaneNet             |   89.3    | 86.4      | 0.068     | 0.477     | 0.015     | 0.202
-| Gen-LaneNet            |   90.1    | 88.1      | 0.061     | 0.496     | 0.012     | 0.214
+## Model
 
-- **Rare Subset**
+| Method                 | mAP     | F-Score 
+|------------------------|:---------:|:---------:
+| 3D-LaneNet             |   89.3    | 86.4      
 
-| Method                 | AP     | F-Score | x error near (m) | x error far (m) | z error near (m) | z error far (m) |
-|------------------------|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
-| 3D-LaneNet             |  74.6     | 72.0      | 0.166     | 0.855     | 0.039     | 0.521
-| Gen-LaneNet            |  79.0     | 78.0      | 0.139     | 0.903     | 0.030     | 0.539
+## SWA: ~~ threshold
+- what is SWA?
+
+| Method                 | mAP     | F-Score 
+|------------------------|:---------:|:---------:
+| SWA(threshold=0.1)     |  74.6     | 72.0      
 
 - **Illumination Change**
 
-| Method                 | AP     | F-Score | x error near (m) | x error far (m) | z error near (m) | z error far (m) |
-|------------------------|:---------:|:---------:|:---------:|:---------:|:---------:|:---------:|
-| 3D-LaneNet             |   74.9    | 72.5      | 0.115     | 0.601     | 0.032     | 0.230
-| Gen-LaneNet            |   87.2    | 85.3      | 0.074     | 0.538     | 0.015     | 0.232
+| Method                 | mAP     | F-Score 
+|------------------------|:---------:|:---------:
+| 3D-LaneNet             |   74.9    | 72.5      
+
 
 <br/><br/>
 
