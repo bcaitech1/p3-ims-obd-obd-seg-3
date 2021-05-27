@@ -1,8 +1,13 @@
 # Detection Project for NAVER AI BoostCamp 
 
+### 🏆Score & Standiing
+
+(Public) 0.6051, 4등 
+(Private) 0.4741, 7등
+
 <br/><br/>
 
-# VumbleBot - BaselineCode  <!-- omit in toc -->
+# 목차 
 
 - [File Structure](#file-structure)
 - [pipeline](#pipeline)
@@ -108,13 +113,13 @@ bash scripts/stylize.sh
 
 We trained models on our lab's Linux cluster. The environment listed below reflects a typical software / hardware configuration in this cluster.
 
-Hardware:
+#### Hardware:
 - CPU: Xeon Gold 5120
 - GPU: Tesla V100, P40
 - Mem: > 90GB
 - Data is stored in remote server stroage.
 
-Software:
+#### Software:
 - System: Ubuntu 18.04.4 LTS with Linux 4.4.0-210-generic kernel.
 - Python: 3.7 distributed by Anaconda.
 - CUDA: 10.1
@@ -125,22 +130,37 @@ Software:
 
 ## Model
 
-| Method                 | mAP     | F-Score 
+| Method                 | mAP       |  config  |  pretrained 
+|------------------------|:---------:|:--------:|:---------:
+| Faster RCNN            |  0.44    |  config   |
+| augmented + GFL v2 + multi scale train                |  0.49    |  config   |  pretrained 
+| vfnet r2 101 + multi scale train                 |  0.5336    |  config   |  pretrained 
+| vfnet r2 101 + multi scale train + SWA           |   0.5453    |  config   |  pretrained 
+| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5445    |  config   |  pretrained 
+| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  pretrained 
+| DetectoRS           |  0.4848    |  config   |  pretrained 
+| Swin-t(30 epoch)            |  0.54    |  config   |  pretrained 
+| DETR            |  0.43    |  config   |  pretrained 
+| Emprical Attention            |  0.4805    |  config   |  pretrained 
+
+
+## NMS(non-maximum suppression)
+
+| nms_score_thr                 | iou_threshold     | F-mAP 
 |------------------------|:---------:|:---------:
-| 3D-LaneNet             |   89.3    | 86.4      
+| 0.00    |  0.40    | 0.4481(채택)    
+| 0.04    |  0.50    | 0.4373  
+| 0.06    |  0.50    | 0.4351    
+| 0.00    |  0.40    | 0.4481    
+| 0.00    |  0.35    | 0.4462
 
-## SWA: ~~ threshold
-- what is SWA?
+## MultiScale
 
-| Method                 | mAP     | F-Score 
-|------------------------|:---------:|:---------:
-| SWA(threshold=0.1)     |  74.6     | 72.0      
-
-- **Illumination Change**
-
-| Method                 | mAP     | F-Score 
-|------------------------|:---------:|:---------:
-| 3D-LaneNet             |   74.9    | 72.5      
+| Model                 | Scale     
+|------------------------|:---------:
+| GFLv2             |   [1333,960],[1333,800],[1333,480]  
+| UniverseNet             |   [1333,960],[1333,800],[1333,480]  
+| VFNet            |   [1333,800],[1333,900],[1333,1000]
 
 
 <br/><br/>
