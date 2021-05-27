@@ -34,25 +34,32 @@
 ### Input
   
 ```
-input/
+/
 │ 
-├── config/ - strategies
-│   ├── ST01.json
-│   └── ...
+├── MainModel
+│   ├── config
+│   ├── mmdet
+│   ├── requirements
+│   ├── faster_rcnn_train.ipynb
+│   ├── faster_rcnn_train_kfold.ipynb
+│   ├── faster_rcnn_train_mosaic.ipynb
+│   ├── faster_rcnn_train_ensemble.ipynb
+│   ├── faster_rcnn_train_psuedo.ipynb
+│   ├── gflv2_train.ipynb
+│   ├── universenet_train.ipynb
+│   ├── vfnet_train.ipynb
+│   └── requirements
 │
-├── checkpoint/ - checkpoints&predictions (strategy_alias_seed)
-│   ├── ST01_base_00
-│   │   ├── checkpoint-500
-│   │   └── ...
-│   ├── ST01_base_95
-│   └── ...
+├── SwinModel
+│   ├── apex
+│   ├── config
+│   ├── mmdet
+│   ├── swin_train.ipynb
+│   └── swin_inference.ipynb
 │ 
-├── data/ - competition data
-│   ├── dummy_data/
-│   ├── train_data/
-│   └── test_data/
-│
-├─── embed/ - embedding caches of wikidocs.json
+├── README.md
+├── pipeline.png
+├── __init__.py
 ```
 
 <br/><br/>
