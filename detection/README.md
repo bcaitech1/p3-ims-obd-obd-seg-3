@@ -118,15 +118,13 @@ bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
 #### SWA
-- generalization에 강하여 test 셋에서 훨씬 좋은 성능을 보인다.
-- Faster-Rcnn LB 기준 0.02AP 증가
+- Generalization에 강하여 test 셋에서 훨씬 좋은 성능을 보인다.</br>
 - SWA를 mmdetection에 적용하기 쉽게 만들어진 opensource를 참고 : [Link](https://github.com/hyz-xmaster/swa_object_detection)
-
-#### Multiscale
-```
-bash scripts/colorization.sh
-bash scripts/stylize.sh
-```
+- Faster-Rcnn LB 기준 0.02 증가
+#### Set scale
+- Challenge set : train size (512, 512), test size (512, 512)
+- (512, 512) size를 통해 train, test를 진행하는 것 보다 논문에서 사용한 scale을 따라 진행하는 것이 더 좋은 결과가 나왔다.
+- 아래의 Result에 표를 기록.
 #### Ensemble
 ```
 bash scripts/colorization.sh
@@ -196,7 +194,18 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 
 ## Reference/ Citation
 
-[1] RetinaFace implementation: [biubug6/Pytorch_Retinaface](https://github.com/biubug6/Pytorch_Retinaface)<br/>
+[1] mmdetection
+@article{mmdetection,
+  title   = {{MMDetection}: Open MMLab Detection Toolbox and Benchmark},
+  author  = {Chen, Kai and Wang, Jiaqi and Pang, Jiangmiao and Cao, Yuhang and
+             Xiong, Yu and Li, Xiaoxiao and Sun, Shuyang and Feng, Wansen and
+             Liu, Ziwei and Xu, Jiarui and Zhang, Zheng and Cheng, Dazhi and
+             Zhu, Chenchen and Cheng, Tianheng and Zhao, Qijie and Li, Buyu and
+             Lu, Xin and Zhu, Rui and Wu, Yue and Dai, Jifeng and Wang, Jingdong
+             and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
+  journal= {arXiv preprint arXiv:1906.07155},
+  year={2019}
+}
 [2] WS-DAN implementation: [GuYuc/WS-DAN.PyTorch](https://github.com/GuYuc/WS-DAN.PyTorch).<br/>
 [3] EfficientNet implementation: [lukemelas/EfficientNet-PyTorch](https://github.com/lukemelas/EfficientNet-PyTorch).<br/>
 [4] Face alignment code is from: [deepinsight/insightface](https://github.com/deepinsight/insightface/blob/master/common/face_align.py).<br/>
