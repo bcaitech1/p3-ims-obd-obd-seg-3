@@ -1,94 +1,14 @@
-import segmentation_models_pytorch.utils.losses
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from pycocotools.coco import COCO
 import numpy as np
-
-import cv2 as cv
-import numpy as np
-
 import torch
-
 from scipy.ndimage.morphology import distance_transform_edt as edt
-from scipy.ndimage import convolve
-
 from torch.autograd import Variable
 import segmentation_models_pytorch as smp
 import lib.lovasz_losses as LOVASZ
+from utils import get_classes_count
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
-
-
-# https://discuss.pytorch.org/t/is-this-a-correct-implementation-for-focal-loss-in-pytorch/43327/8
-class FocalLoss(nn.Module):
-    def __init__(self, weight=None,
-                 gamma=2., reduction='mean'):
-        nn.Module.__init__(self)
-        self.weight = weight
-        self.gamma = gamma
-        self.reduction = reduction
-
-    def forward(self, input_tensor, target_tensor):
-        log_prob = F.log_softmax(input_tensor, dim=-1)
-        prob = torch.exp(log_prob)
-        return F.nll_loss(
-            ((1 - prob) ** self.gamma) * log_prob,
-            target_tensor,
-            weight=self.weight,
-            reduction=self.reduction
-        )
-
-
-class FocalLoss2(nn.Module):
-    def __init__(self, gamma=0, alpha=None, size_average=True):
-        super(FocalLoss2, self).__init__()
-        self.gamma = gamma
-        self.alpha = alpha
-        if isinstance(alpha, (float, int)): self.alpha = torch.Tensor([alpha, 1 - alpha])
-        if isinstance(alpha, list): self.alpha = torch.Tensor(alpha)
-        self.size_average = size_average
-
-    def forward(self, input, target):
-        if input.dim() > 2:
-            input = input.view(input.size(0), input.size(1), -1)  # N,C,H,W => N,C,H*W
-            input = input.transpose(1, 2)  # N,C,H*W => N,H*W,C
-            input = input.contiguous().view(-1, input.size(2))  # N,H*W,C => N*H*W,C
-        target = target.view(-1, 1)
-        logpt = F.log_softmax(input)
-        logpt = logpt.gather(1, target)
-        logpt = logpt.view(-1)
-        pt = Variable(logpt.data.exp())
-        if self.alpha is not None:
-            if self.alpha.type() != input.data.type():
-                self.alpha = self.alpha.type_as(input.data)
-            at = self.alpha.gather(0, target.data.view(-1))
-            logpt = logpt * Variable(at)
-        loss = -1 * (1 - pt) ** self.gamma * logpt
-        if self.size_average:
-            return loss.mean()
-        else:
-            return loss.sum()
-
-
-def get_classes_count():
-    # 모든 사진들로부터 background를 제외한 클래스별 픽셀 카운트를 구합니다.
-    coco = COCO("../input/data/train_all.json")
-    annotations = coco.loadAnns(coco.getAnnIds())
-    class_num = len(coco.getCatIds())
-    classes_count = [0] * class_num
-    for annotation in annotations:
-        class_id = annotation["category_id"]
-        pixel_count = np.sum(coco.annToMask(annotation))
-        classes_count[class_id] += pixel_count
-    # background의 픽셀 카운트를 계산합니다.
-    image_num = len(coco.getImgIds())
-    total_pixel_count = image_num * 512 * 512
-    background_pixel_count = total_pixel_count - sum(classes_count)
-    # 모든 클래스별 픽셀 카운트를 구합니다.
-    nclasses_count = [background_pixel_count] + classes_count
-    return nclasses_count
 
 
 class WeightedCrossEntropy(nn.Module):
@@ -105,96 +25,11 @@ class WeightedCrossEntropy(nn.Module):
         print(classes_count)
         print("* 최종 weight")
         print(weights)
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         weights = weights.to(device)
         self.CrossEntropyLoss = nn.CrossEntropyLoss(weight=weights)
 
     def forward(self, inputs, target):
         return self.CrossEntropyLoss(inputs, target)
-
-
-class softCrossEntropy(nn.Module):
-    def __init__(self):
-        super(softCrossEntropy, self).__init__()
-        return
-
-    def forward(self, inputs, target):
-        """
-        :param inputs: predictions
-        :param target: target labels
-        :return: loss
-        """
-        log_likelihood = - F.log_softmax(inputs, dim=1)
-        sample_num, class_num = target.shape
-        multiple = torch.mul(log_likelihood, target)
-        loss = torch.sum(multiple) / sample_num
-        return loss
-
-
-class focal_softCrossEntropy(nn.Module):
-    def __init__(self, weight=None,
-                 gamma=2.):
-        self.gamma = gamma
-        super(focal_softCrossEntropy, self).__init__()
-        return
-
-    def forward(self, inputs, target):
-        """
-        :param inputs: predictions
-        :param target: target labels
-        :return: loss
-        """
-        log_prob = -F.log_softmax(inputs, dim=1)
-        prob = torch.exp(log_prob)
-        sample_num, class_num = target.shape
-        prob_focal = ((1 - prob) ** self.gamma) * log_prob
-
-        multiple = torch.mul(log_prob, target)
-        loss = torch.sum(multiple) / sample_num
-        return loss
-
-
-class LabelSmoothingLoss(nn.Module):
-    def __init__(self, classes=18, smoothing=0.0, dim=-1):
-        super(LabelSmoothingLoss, self).__init__()
-        self.confidence = 1.0 - smoothing
-        self.smoothing = smoothing
-        self.cls = classes
-        self.dim = dim
-
-    def forward(self, pred, target):
-        pred = pred.log_softmax(dim=self.dim)
-        with torch.no_grad():
-            true_dist = torch.zeros_like(pred)
-            true_dist.fill_(self.smoothing / (self.cls - 1))
-            true_dist.scatter_(1, target.data.unsqueeze(1), self.confidence)
-        return torch.mean(torch.sum(-true_dist * pred, dim=self.dim))
-
-
-# https://gist.github.com/SuperShinyEyes/dcc68a08ff8b615442e3bc6a9b55a354
-class F1Loss(nn.Module):
-    def __init__(self, classes=18, epsilon=1e-7):
-        super().__init__()
-        self.classes = classes
-        self.epsilon = epsilon
-
-    def forward(self, y_pred, y_true):
-        assert y_pred.ndim == 2
-        assert y_true.ndim == 1
-        y_true = F.one_hot(y_true, self.classes).to(torch.float32)
-        y_pred = F.softmax(y_pred, dim=1)
-
-        tp = (y_true * y_pred).sum(dim=0).to(torch.float32)
-        tn = ((1 - y_true) * (1 - y_pred)).sum(dim=0).to(torch.float32)
-        fp = ((1 - y_true) * y_pred).sum(dim=0).to(torch.float32)
-        fn = (y_true * (1 - y_pred)).sum(dim=0).to(torch.float32)
-
-        precision = tp / (tp + fp + self.epsilon)
-        recall = tp / (tp + fn + self.epsilon)
-
-        f1 = 2 * (precision * recall) / (precision + recall + self.epsilon)
-        f1 = f1.clamp(min=self.epsilon, max=1 - self.epsilon)
-        return 1 - f1.mean()
 
 
 def make_one_hot(labels, C=12):
@@ -229,11 +64,8 @@ https://arxiv.org/pdf/1904.10030.pdf
 copy pasted from - all credit goes to original authors:
 https://github.com/SilmarilBearer/HausdorffLoss
 """
-
-
 class HausdorffDTLoss(nn.Module):
     """Binary Hausdorff loss based on distance transform"""
-
     def __init__(self, alpha=2.0, **kwargs):
         super(HausdorffDTLoss, self).__init__()
         self.alpha = alpha
@@ -276,13 +108,6 @@ class HausdorffDTLoss(nn.Module):
             pred = pred_all[:, c, :, :]
             target = target_all[:, c, :, :]
 
-            # assert pred.dim() == 4 or pred.dim() == 5, "Only 2D and 3D supported"
-            # assert (
-            #     pred.dim() == target.dim()
-            # ), "Prediction and target need to be of same dimension"
-
-            # pred = torch.sigmoid(pred)
-
             pred_dt = torch.from_numpy(self.distance_field(pred.detach().cpu().numpy())).float()
             target_dt = torch.from_numpy(self.distance_field(target.detach().cpu().numpy())).float()
 
@@ -324,7 +149,7 @@ class DiceLoss(nn.Module):
         inputs_one_hot.scatter_(1, inputs_max_idx, 1)
         # target: N, H, W -> H, C, H, W
         target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
-        target_one_hot = make_one_hot(target) # N, H, W -> N, C, H, W
+        target_one_hot = make_one_hot(target)  # N, H, W -> N, C, H, W
         return self.DiceLoss(inputs_one_hot, target_one_hot)
 
 
@@ -333,7 +158,7 @@ class DiceCrossEntropyLoss(nn.Module):
         super(DiceCrossEntropyLoss, self).__init__()
         self.CrossEntropyLoss = nn.CrossEntropyLoss()
 
-    def forward(self, inputs, target): # N, C, H, W # N, H, W
+    def forward(self, inputs, target):  # N, C, H, W # N, H, W
         # cross entropy loss
         ce_loss = self.CrossEntropyLoss(inputs, target)
 
@@ -345,46 +170,12 @@ class DiceCrossEntropyLoss(nn.Module):
         inputs_one_hot.scatter_(1, inputs_max_idx, 1)
         # target: N, H, W -> H, C, H, W
         target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
-        target_one_hot = make_one_hot(target) # N, H, W -> N, C, H, W
+        target_one_hot = make_one_hot(target)  # N, H, W -> N, C, H, W
         numerator = 2 * torch.sum(inputs_one_hot * target_one_hot)
         denominator = torch.sum(inputs_one_hot + target_one_hot)
         dice_loss = 1 - (numerator + 1) / (denominator + 1)
 
-
-        return ce_loss*1 + dice_loss*10
-
-
-def _iou(pred, target, size_average = True):
-
-    b = pred.shape[0]
-    IoU = 0.0
-    for i in range(0,b):
-        #compute the IoU of the foreground
-        Iand1 = torch.sum(target[i,:,:,:]*pred[i,:,:,:])
-        Ior1 = torch.sum(target[i,:,:,:]) + torch.sum(pred[i,:,:,:])-Iand1
-        IoU1 = Iand1/Ior1
-
-        #IoU loss is (1-IoU1)
-        IoU = IoU + (1-IoU1)
-
-    return IoU/b
-
-
-class IOU(torch.nn.Module):
-    def __init__(self, size_average = True):
-        super(IOU, self).__init__()
-        self.size_average = size_average
-
-    def forward(self, pred, target):
-        target = target.view(target.shape[0], 1, target.shape[1], target.shape[2])
-        target = make_one_hot(target)
-        return _iou(pred, target, self.size_average)
-
-def IOU_loss(pred,label):
-    iou_loss = IOU(size_average=True)
-    iou_out = iou_loss(pred, label)
-    print("iou_loss:", iou_out.data.cpu().numpy())
-    return iou_out
+        return ce_loss * 1 + dice_loss * 10
 
 
 class RovaszLoss(nn.Module):
@@ -394,6 +185,7 @@ class RovaszLoss(nn.Module):
 
     def forward(self, inputs, target):
         return self.Rovasz.lovasz_softmax(inputs, target)
+
 
 class RovaszCrossEntropyLoss(nn.Module):
     def __init__(self):
@@ -410,18 +202,9 @@ class RovaszCrossEntropyLoss(nn.Module):
 _criterion_entrypoints = {
     'cross_entropy': nn.CrossEntropyLoss,
     'weighted_cross_entropy': WeightedCrossEntropy,
-    'focal': FocalLoss,
-    'label_smoothing': LabelSmoothingLoss,
-    'f1': F1Loss,
-    'soft_cross_entropy': softCrossEntropy,
-    'focal_softCE': focal_softCrossEntropy,
-    'focal2': FocalLoss2,
     'HausdorffDT': HausdorffDTLoss,
-    'soft_cross_entropy': softCrossEntropy,
-    'focal_softCE': focal_softCrossEntropy,
     'dice': DiceLoss,
     'dice_cross_entropy': DiceCrossEntropyLoss,
-    'iou': IOU,
     'rovasz': RovaszLoss,
     'rovasz_cross_entropy': RovaszCrossEntropyLoss
 }

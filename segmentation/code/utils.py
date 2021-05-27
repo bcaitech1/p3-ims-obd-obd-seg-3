@@ -4,6 +4,7 @@ import torch
 import random
 import os
 from importlib import import_module
+from pycocotools.coco import COCO
 
 def _fast_hist(label_true, label_pred, n_class):
     mask = (label_true >= 0) & (label_true < n_class)
@@ -94,3 +95,21 @@ def copyblob(src_img, src_mask, dst_img, dst_mask, src_class, dst_class):
             dst_idx[1][i] = (min(dst_idx[1][i], mask_x-1))
         dst_mask[dst_idx] = src_class
         dst_img[:, dst_idx[0], dst_idx[1]] = src_img[:, src_idx[0], src_idx[1]]
+
+def get_classes_count():
+    # 모든 사진들로부터 background를 제외한 클래스별 픽셀 카운트를 구합니다.
+    coco = COCO("../input/data/train_all.json")
+    annotations = coco.loadAnns(coco.getAnnIds())
+    class_num = len(coco.getCatIds())
+    classes_count = [0] * class_num
+    for annotation in annotations:
+        class_id = annotation["category_id"]
+        pixel_count = np.sum(coco.annToMask(annotation))
+        classes_count[class_id] += pixel_count
+    # background의 픽셀 카운트를 계산합니다.
+    image_num = len(coco.getImgIds())
+    total_pixel_count = image_num * 512 * 512
+    background_pixel_count = total_pixel_count - sum(classes_count)
+    # 모든 클래스별 픽셀 카운트를 구합니다.
+    nclasses_count = [background_pixel_count] + classes_count
+    return nclasses_count
