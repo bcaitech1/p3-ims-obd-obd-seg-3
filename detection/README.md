@@ -14,6 +14,7 @@
   - [Train](#train)
   - [Inference](#inference)
 - [pipeline](#pipeline)
+  - [Data](#data)
   - [Augmentation](#augmentation)
   - [Train](#train)
   - [Loss](#loss)
@@ -99,40 +100,73 @@ Run each model's ipynb inference file
 
 ![pipeline](https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/detection/pipeline1.png)
 
-### Data
+#### Data
 데이터는 상위 폴더 [README](https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/README.md)에 정리되어 있음.
 
+<br/>
+
 #### Augmentation
-```
-bash scripts/colorization.sh
-bash scripts/stylize.sh
-```
-#### Train
-```
-bash scripts/train_detectors.sh
-bash scripts/train_universenet.sh
-```
-#### Loss
-```
-bash scripts/colorization.sh
-bash scripts/stylize.sh
-```
+
+<br/>
+
+#### Modeling
+
+| Method                 | mAP       |
+|------------------------|:---------:|
+| DETR            |  0.43 
+| Faster RCNN            |  0.44    |
+| Emprical Attention            |  0.4805
+| DetectoRS           |  0.4848    
+| augmented + GFL v2 + multi scale train                |  0.49    
+| vfnet r2 101 + multi scale train                 |  0.5336 
+| Swin-t(30 epoch)            |  0.54    
+| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5445    
+| vfnet r2 101 + multi scale train + SWA           |   0.5453    
+| augmented + UniverseNet + multi scale train            |  0.5820    
+
+<br/>
+
 #### SWA
 - Generalization에 강하여 test 셋에서 훨씬 좋은 성능을 보인다.</br>
 - SWA를 mmdetection에 적용하기 쉽게 만들어진 opensource를 참고 : [Link](https://github.com/hyz-xmaster/swa_object_detection)
 - Faster-Rcnn LB 기준 0.02 증가
+
+<br/>
+
 #### Set scale
 - Challenge set : train size (512, 512), test size (512, 512)
 - (512, 512) size를 통해 train, test를 진행하는 것 보다 논문에서 사용한 scale을 따라 진행하는 것이 더 좋은 결과가 나왔다.
-- 아래의 Result에 표를 기록.
+<br/>
+| Model                  | Train Scale | Test Scale     
+|------------------------|:---------:|:---------:
+| GFLv2                  |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
+| UniverseNet            |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
+| VFNet                  |    [(1333,960), (1333,480)]       |   [1333,800],[1333,900],[1333,1000]
+| Swin-s                 |      [(480, 1333), (512, 1333),<br/>(544, 1333), (576, 1333),<br/>(608, 1333), (640, 1333),<br/>(672, 1333), (704, 1333),<br/>(736, 1333), (768, 1333),<br/>(800, 1333)], |  [(1000, 600),(1333, 800),(1666, 1000)]
+<br/>
+
+#### NMS(non-maximum suppression)
+
+| nms_score_thr                 | iou_threshold     | F-mAP 
+|------------------------|:---------:|:---------:
+| 0.00    |  0.40    | 0.4481(채택)    
+| 0.04    |  0.50    | 0.4373  
+| 0.06    |  0.50    | 0.4351    
+| 0.00    |  0.40    | 0.4481    
+| 0.00    |  0.35    | 0.4462
+
+<br/>
+
 #### Ensemble
-```
-bash scripts/colorization.sh
-bash scripts/stylize.sh
-```
+
+| Method                |    model weight      |    mAP    |
+|-----------------------|:-------------:|:---------:|
+|  GFLv2, VFNe, UniversNnet   |    0.5:0.5:0.5   |  0.6048 |         
+|  GFLv2, VFNet, UniverseNet Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
+
+<br/>
+
 #### Submission preparing
-```
-```
 
 <br/><br/>
 
@@ -155,46 +189,20 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 
 # Results
 
-## Model
+✨best performamce of each model
 
 | Method                 | mAP       |  config  |  pretrained 
 |------------------------|:---------:|:--------:|:---------:
-| Faster RCNN            |  0.44    |  config   |
-| augmented + GFL v2 + multi scale train                |  0.49    |  config   |  pretrained 
-| vfnet r2 101 + multi scale train                 |  0.5336    |  config   |  pretrained 
-| vfnet r2 101 + multi scale train + SWA           |   0.5453    |  config   |  pretrained 
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5445    |  config   |  pretrained 
+| augmented + GFL v2 + multi scale train                |  0.5706    |  config   |  pretrained 
+| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   |  pretrained 
 | augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  pretrained 
-| DetectoRS           |  0.4848    |  config   |  pretrained 
-| Swin-t(30 epoch)            |  0.54    |  config   |  pretrained 
-| DETR            |  0.43    |  config   |  pretrained 
-| Emprical Attention            |  0.4805    |  config   |  pretrained 
-
-
-## NMS(non-maximum suppression)
-
-| nms_score_thr                 | iou_threshold     | F-mAP 
-|------------------------|:---------:|:---------:
-| 0.00    |  0.40    | 0.4481(채택)    
-| 0.04    |  0.50    | 0.4373  
-| 0.06    |  0.50    | 0.4351    
-| 0.00    |  0.40    | 0.4481    
-| 0.00    |  0.35    | 0.4462
-
-## MultiScale
-
-| Model                 | Scale     
-|------------------------|:---------:
-| GFLv2             |   [1333,960],[1333,800],[1333,480]  
-| UniverseNet             |   [1333,960],[1333,800],[1333,480]  
-| VFNet            |   [1333,800],[1333,900],[1333,1000]
 
 
 <br/><br/>
 
 ## Reference/ Citation
 
-[1] mmdetection
+[1] mmdetection <br/>
 @article{mmdetection,
   title   = {{MMDetection}: Open MMLab Detection Toolbox and Benchmark},
   author  = {Chen, Kai and Wang, Jiaqi and Pang, Jiangmiao and Cao, Yuhang and
@@ -205,7 +213,8 @@ We trained models on our lab's Linux cluster. The environment listed below refle
              and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
   journal= {arXiv preprint arXiv:1906.07155},
   year={2019}
-}
-[2] WS-DAN implementation: [GuYuc/WS-DAN.PyTorch](https://github.com/GuYuc/WS-DAN.PyTorch).<br/>
-[3] EfficientNet implementation: [lukemelas/EfficientNet-PyTorch](https://github.com/lukemelas/EfficientNet-PyTorch).<br/>
-[4] Face alignment code is from: [deepinsight/insightface](https://github.com/deepinsight/insightface/blob/master/common/face_align.py).<br/>
+}<br/>
+[2] [GFL v2 & UniverseNet](https://github.com/shinya7y/UniverseNet)<br/>
+[3] [VFNET](https://github.com/hyz-xmaster/VarifocalNet)<br/>
+[4] [DetectoRS](https://github.com/joe-siyuan-qiao/DetectoRS)<br/>
+[5] [SWIN](https://github.com/SwinTransformer/Swin-Transformer-Object-Detection)<br/>
