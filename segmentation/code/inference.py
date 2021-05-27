@@ -1,26 +1,20 @@
 import argparse
 import os
 from importlib import import_module
-
 import pandas as pd
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
-
 from dataset import CustomDataset
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
-
-from tqdm.auto import tqdm
 from utils import load_model
-import torchvision.transforms as transforms
 
 # collate_fn needs for batch
 def collate_fn(batch):
     return tuple(zip(*batch))
 
 def get_model_dir(folder_path):
-    return '/opt/ml/p3-ims-obd-obd-seg-3/model/' + folder_path
+    return '../model/' + folder_path
 
 @torch.no_grad()
 def inference(data_dir, model_dir, output_dir, args):
@@ -39,15 +33,15 @@ def inference(data_dir, model_dir, output_dir, args):
     test_path = os.path.join(data_dir, 'test.json')
 
     test_transform = A.Compose([
-        # A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, brightness_by_max=True, p=0.5),
-        # Normalized
         ToTensorV2(),
     ])
     # test dataset
     category_names = ['Backgroud', 'UNKNOWN', 'General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic',
                       'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
     transform_module = getattr(import_module("dataset"), args.dataset)
-    test_dataset = transform_module(data_dir=test_path, category_names=category_names, mode='test',
+    test_dataset = transform_module(data_dir=test_path,
+                                    category_names=category_names,
+                                    mode='test',
                                     transform=test_transform)
     test_loader = torch.utils.data.DataLoader(dataset=test_dataset,
                                               batch_size=args.batch_size,
@@ -56,8 +50,7 @@ def inference(data_dir, model_dir, output_dir, args):
                                               pin_memory=use_cuda,
                                               drop_last=False,
                                               )
-    print(test_loader.dataset)
-    print(test_loader.dataset.mean_std)
+
     size = 256
     transform = A.Compose([A.Resize(256, 256)])
     file_name_list = []
@@ -91,17 +84,14 @@ def inference(data_dir, model_dir, output_dir, args):
                 outs += softmax(outputs) * weights[i]
             oms = torch.argmax(outs.squeeze(), dim=1).detach().cpu().numpy()
 
-
             # resize (256 x 256)
             temp_mask = []
             for img, mask in zip(np.stack(imgs), oms):
-                # print(f'img shape: {img.shape}')
                 transformed = transform(image=img, mask=mask)
                 mask = transformed['mask']
                 temp_mask.append(mask)
 
             oms = np.array(temp_mask)
-
             oms = oms.reshape([oms.shape[0], size * size]).astype(int)
             preds_array = np.vstack((preds_array, oms))
 
@@ -140,23 +130,14 @@ def make_submission(data_dir, model_dir, output_dir, args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    # Data and model checkpoints directories
-    parser.add_argument('--batch_size', type=int, default=32, help='input batch size for validing (default: 512)')
-    # parser.add_argument('--resize', type=tuple, default=(96, 128), help='resize size for image when you trained (default: (96, 128))')
-    parser.add_argument('--model', type=str, default='DeepLapV3PlusEfficientnetB5NoisyStudent',
-                        help='model type (default: FCN8s)')
-
-    parser.add_argument('--dataset', type=str, default='CustomDataset',
-                        help='dataset augmentation type (default: CustomDataset)')
-
+    parser.add_argument('--batch_size', type=int, default=32, help='input batch size for validing (default: 32)')
+    parser.add_argument('--model', type=str, default='DeepLapV3PlusEfficientnetB5NoisyStudent', help='model type (default: DeepLapV3PlusEfficientnetB5NoisyStudent)')
+    parser.add_argument('--dataset', type=str, default='CustomDataset', help='dataset augmentation type (default: CustomDataset)')
     parser.add_argument('--name', type=str, default='submission', help='submission file name (default: submission)')
 
-    # Container environment
-    parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_EVAL', '/opt/ml/input/data'))
-    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_CHANNEL_MODEL',
-                                                                        '/opt/ml/model/DeepLapV3PlusEfficientnetB5NoisyStudent'))
-    parser.add_argument('--output_dir', type=str,
-                        default=os.environ.get('SM_OUTPUT_DATA_DIR', '/opt/ml/code/submission'))
+    parser.add_argument('--data_dir', type=str, default=os.environ.get('SM_CHANNEL_EVAL', '../input/data'))
+    parser.add_argument('--model_dir', type=str, default=os.environ.get('SM_CHANNEL_MODEL', '../model/DeepLapV3PlusEfficientnetB5NoisyStudent'))
+    parser.add_argument('--output_dir', type=str, default=os.environ.get('SM_OUTPUT_DATA_DIR', '../submission'))
     parser.add_argument('--tta', type=int, default=0)
     parser.add_argument('--weights', type=str, default='')
     args = parser.parse_args()
@@ -164,8 +145,6 @@ if __name__ == '__main__':
     data_dir = args.data_dir
     model_dir = args.model_dir
     output_dir = args.output_dir
-
-    # args.model = 'DeepLapV3PlusEfficientnetB5NoisyStudent'
 
     os.makedirs(output_dir, exist_ok=True)
 
