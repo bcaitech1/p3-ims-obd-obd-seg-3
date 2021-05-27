@@ -24,7 +24,7 @@
 
 ## 데이터 형식
 
-![**COCO Format**](#https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/COCO.png)
+![**COCO Format**](https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/COCO.png)
 
 <br/>
 annotation file은 coco format 으로 이루어져 있습니다.<br/>
