@@ -22,6 +22,128 @@ except ImportError:
     albumentations = None
     Compose = None
 
+import random as random_
+
+
+class BufferTransform(object):
+    def __init__(self, min_buffer_size, p=0.5):
+        self.p = p
+        self.min_buffer_size = min_buffer_size
+        self.buffer = []
+
+    def apply(self, results):
+        raise NotImplementedError
+
+    def __call__(self, results):
+        if len(self.buffer) < self.min_buffer_size:
+            self.buffer.append(results.copy())
+            return None
+        if np.random.rand() <= self.p and len(self.buffer) >= self.min_buffer_size:
+            random_.shuffle(self.buffer)
+            return self.apply(results)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f"(\nmin_buffer_size={self.min_buffer_size}),\n"
+        repr_str += f"(\nratio={self.p})"
+        return repr_str
+
+
+@PIPELINES.register_module()
+class Mosaic(BufferTransform):
+    """
+    Based on https://github.com/dereyly/mmdet_sota
+    """
+
+    def __init__(self, min_buffer_size=4, p=0.5, pad_val=0):
+        assert min_buffer_size >= 4, "Buffer size for mosaic should be at least 4!"
+        super(Mosaic, self).__init__(min_buffer_size=min_buffer_size, p=p)
+        self.pad_val = pad_val
+
+    def apply(self, results):
+        # take four images
+        a = self.buffer.pop()
+        b = self.buffer.pop()
+        c = self.buffer.pop()
+        d = self.buffer.pop()
+        # get max shape
+        max_h = max(a["img"].shape[0], b["img"].shape[0], c["img"].shape[0], d["img"].shape[0])
+        max_w = max(a["img"].shape[1], b["img"].shape[1], c["img"].shape[1], d["img"].shape[1])
+
+        # cropping pipe
+        padder = Pad(size=(max_h, max_w), pad_val=self.pad_val)
+
+        # crop
+        a, b, c, d = padder(a), padder(b), padder(c), padder(d)
+
+        # check if cropping returns None => see above in the definition of RandomCrop
+        if not a or not b or not c or not d:
+            return results
+
+        # offset bboxes in stacked image
+        def offset_bbox(res_dict, x_offset, y_offset, keys=("gt_bboxes", "gt_bboxes_ignore")):
+            for k in keys:
+                if k in res_dict and res_dict[k].size > 0:
+                    res_dict[k][:, 0::2] += x_offset
+                    res_dict[k][:, 1::2] += y_offset
+            return res_dict
+
+        b = offset_bbox(b, max_w, 0)
+        c = offset_bbox(c, 0, max_h)
+        d = offset_bbox(d, max_w, max_h)
+
+        # collect all the data into result
+        top = np.concatenate([a["img"], b["img"]], axis=1)
+        bottom = np.concatenate([c["img"], d["img"]], axis=1)
+        results["img"] = np.concatenate([top, bottom], axis=0)
+        results["img_shape"] = (max_h * 2, max_w * 2)
+
+        for key in ["gt_labels", "gt_bboxes", "gt_labels_ignore", "gt_bboxes_ignore"]:
+            if key in results:
+                results[key] = np.concatenate([a[key], b[key], c[key], d[key]], axis=0)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__repr__()
+        repr_str += f"(\npad_val={self.pad_val})"
+        return repr_str
+
+
+@PIPELINES.register_module()
+class Mixup(BufferTransform):
+    def __init__(self, min_buffer_size=2, p=0.5, pad_val=0):
+        assert min_buffer_size >= 2, "Buffer size for mosaic should be at least 2!"
+        super(Mixup, self).__init__(min_buffer_size=min_buffer_size, p=p)
+        self.pad_val = pad_val
+
+    def apply(self, results):
+        # take four images
+        a = self.buffer.pop()
+        b = self.buffer.pop()
+
+        # get min shape
+        max_h = max(a["img"].shape[0], b["img"].shape[0])
+        max_w = max(a["img"].shape[1], b["img"].shape[1])
+
+        # cropping pipe
+        padder = Pad(size=(max_h, max_w), pad_val=self.pad_val)
+
+        # crop
+        a, b = padder(a), padder(b)
+
+        # check if cropping returns None => see above in the definition of RandomCrop
+        if not a or not b:
+            return results
+
+        # collect all the data into result
+        results["img"] = ((a["img"].astype(np.float32) + b["img"].astype(np.float32)) / 2).astype(a["img"].dtype)
+        results["img_shape"] = (max_h, max_w)
+
+        for key in ["gt_labels", "gt_bboxes", "gt_labels_ignore", "gt_bboxes_ignore"]:
+            if key in results:
+                results[key] = np.concatenate([a[key], b[key]], axis=0)
+        return results
 
 def imwrite_denormalized_debug_img(func):
     """Write denormalized debug image to file."""

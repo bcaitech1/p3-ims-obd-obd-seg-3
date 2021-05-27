@@ -232,6 +232,82 @@ class CocoDataset(CustomDataset):
                     json_results.append(data)
         return json_results
 
+    def pseudo_results(self, results, output_path=None, pseudo_score_threshold=0.8,
+                       pseudo_confidence_threshold=0.65):
+        assert isinstance(results, list), "results must be a list"
+        assert len(results) == len(self), "The length of results is not equal to the dataset len: {} != {}".format(
+            len(results), len(self)
+        )
+        json_results = []
+        for idx in range(len(self)):
+            img_id = self.img_ids[idx]
+            result = results[idx]
+            for label in range(len(result)):
+                bboxes = result[label]
+                for i in range(bboxes.shape[0]):
+                    data = dict()
+                    data['image_id'] = img_id
+                    data['bbox'] = self.xyxy2xywh(bboxes[i])
+                    data['score'] = float(bboxes[i][4])
+                    data['category_id'] = self.cat_ids[label]
+                    json_results.append(data)
+        pseudo_annotations = []
+        pseudo_images = []
+        for idx in range(len(self)):
+            wheat_bboxes_ = results[idx]
+            scores = np.array([])
+            class_list = []
+            wheat_bboxes_list = np.array([])
+            for class_number in range(11):
+                wheat_bboxes = wheat_bboxes_[class_number]
+                scores = np.concatenate([scores, np.array([bbox[-1] for bbox in wheat_bboxes])])
+                class_list += [class_number] * len(wheat_bboxes)
+                if len(wheat_bboxes_list) == 0:
+                    wheat_bboxes_list = wheat_bboxes
+                else:
+                    wheat_bboxes_list = np.concatenate([wheat_bboxes_list, wheat_bboxes])
+                # scores = np.array([bbox[-1] for bbox in wheat_bboxes])
+            confidence = calc_pseudo_confidence(scores, pseudo_score_threshold=pseudo_score_threshold)
+            # confidence = calc_pseudo_confidence(scores, pseudo_score_threshold=score_array.mean())
+            if len(scores) > 4 and confidence >= pseudo_confidence_threshold:
+                data_info = self.data_infos[idx]
+                data_info["confidence"] = confidence
+                pseudo_images.append(data_info)
+                for index, bbox in enumerate(wheat_bboxes_list):
+                    x, y, w, h = self.xyxy2xywh(bbox)
+                    pseudo_annotations.append(
+                        {
+                            "segmentation": "",
+                            "area": w * h,
+                            "image_id": data_info["id"],
+                            "category_id": class_list[index],
+                            "bbox": [x, y, w, h],
+                            "iscrowd": 0,
+                        }
+                    )
+        for i, ann in enumerate(pseudo_annotations):
+            ann["id"] = i
+        print(len(pseudo_images))
+        mmcv.dump(
+            {
+                "images": pseudo_images,
+                "annotations": pseudo_annotations,
+                "categories": [{'id': 0, 'name': 'UNKNOWN', 'supercategory': 'UNKNOWN'},
+                               {'id': 1, 'name': 'General trash', 'supercategory': 'General trash'},
+                               {'id': 2, 'name': 'Paper', 'supercategory': 'Paper'},
+                               {'id': 3, 'name': 'Paper pack', 'supercategory': 'Paper pack'},
+                               {'id': 4, 'name': 'Metal', 'supercategory': 'Metal'},
+                               {'id': 5, 'name': 'Glass', 'supercategory': 'Glass'},
+                               {'id': 6, 'name': 'Plastic', 'supercategory': 'Plastic'},
+                               {'id': 7, 'name': 'Styrofoam', 'supercategory': 'Styrofoam'},
+                               {'id': 8, 'name': 'Plastic bag', 'supercategory': 'Plastic bag'},
+                               {'id': 9, 'name': 'Battery', 'supercategory': 'Battery'},
+                               {'id': 10, 'name': 'Clothing', 'supercategory': 'Clothing'}
+                               ],
+            },
+            output_path,
+        )
+
     def _segm2json(self, results):
         """Convert instance segmentation results to COCO json style."""
         bbox_json_results = []
