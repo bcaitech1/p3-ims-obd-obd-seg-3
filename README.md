@@ -16,21 +16,31 @@
 
 <br/><br/>
 
+## [🗝세그멘테이션 대회]
+
+[LINK](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/segmentation)
+
+## [🗝detection competition]
+
+[LINK](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/detection)
+
+<br/><br/>
+
 ## 데이터 형식
 
-- COCO Format
+- **COCO Format**
 <br/>
 annotation file은 coco format 으로 이루어져 있습니다.<br/>
 coco format은 크게 2가지 (images, annotations)의 정보를 가지고 있습니다.<br/><br/>
 
-images:<br/>
+**images:**<br/>
 
 id: 파일 안에서 image 고유 id, ex) 1<br/>
 height: 512<br/>
 width: 512<br/>
 filename: ex) batch01_vt/002.jpg<br/>
 
-annotations: <br/>
+**annotations:** <br/>
 
 id: 파일 안에 annotation 고유 id, ex) 1
 segmentation: masking 되어 있는 고유의 좌표
@@ -156,9 +166,5 @@ for idx in plot_1.patches:
 
 <br/><br/>
 
-## Segmentation Project: [LINK](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/segmentation)
-Evaluation Metric: 모든 이미지에서 계산된 mIoU를 평균내어 리더보드에 반영
-## Detection Project: [LINK](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/detection)
-Evaluation Metric: mAP50(Mean Average Precision)
 
 
