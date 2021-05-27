@@ -1,7 +1,0 @@
-Compose([
-  ToTensorV2(always_apply=True, p=1.0, transpose_mask=False),
-], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})
-
-Compose([
-  ToTensorV2(always_apply=True, p=1.0, transpose_mask=False),
-], p=1.0, bbox_params=None, keypoint_params=None, additional_targets={})
