@@ -2,8 +2,9 @@
 
 ### 🏆Score & Standiing
 
-(Public) 0.6051, 4등 
-(Private) 0.4741, 7등
+(Public) 0.6783, 8등 
+(private) 0.6574, 9등 
+<br/>
 
 # 목차 
 
@@ -19,9 +20,9 @@
   - [Train](#train)
   - [Modeling](#modeling)
   - [KFold](#kfold)
-  - [Set scale](#set-scale)
-  - [NMS](#nms)
-  - [Ensemble](#ensemble)
+  - [TTA](#tta)
+  - [MultiScale](#multiscale)
+  - [Softmax Temperature](#softmax-temperature)
 - [Results](#results)
   - [Model](#model)
   - [NMS](#nms)
@@ -110,29 +111,6 @@ Run each model's ipynb inference file
 
 <br/>
 
-#### Loss
-- Challenge set : train size (512, 512), test size (512, 512)
-- (512, 512) size를 통해 train, test를 진행하는 것 보다 논문에서 사용한 scale을 따라 진행하는 것이 더 좋은 결과가 나왔다.
-- 
-<br/>
-
-#### Modeling
-
-| Method                 | mAP       |
-|------------------------|:---------:|
-| DETR            |  0.43 
-| Faster RCNN            |  0.44    |
-| Emprical Attention            |  0.4805
-| DetectoRS           |  0.4848    
-| augmented + GFL v2 + multi scale train                |  0.49    
-| vfnet r2 101 + multi scale train                 |  0.5336 
-| Swin-t(30 epoch)            |  0.54    
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5445    
-| vfnet r2 101 + multi scale train + SWA           |   0.5453    
-| augmented + UniverseNet + multi scale train            |  0.5820    
-
-<br/>
-
 #### kfold
 KFold(5 fold)
 
@@ -142,30 +120,76 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 
 <br/>
 
-#### Set scale
-- Challenge set : train size (512, 512), test size (512, 512)
-- (512, 512) size를 통해 train, test를 진행하는 것 보다 논문에서 사용한 scale을 따라 진행하는 것이 더 좋은 결과가 나왔다.
-<br/>
 
-| Model                  | Train Scale | Test Scale     
-|------------------------|:---------:|:---------:
-| GFLv2                  |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
-| UniverseNet            |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
-| VFNet                  |    [(1333,960), (1333,480)]       |   [1333,800],[1333,900],[1333,1000]
-| Swin-s                 |      [(480, 1333), (512, 1333),<br/>(544, 1333), (576, 1333),<br/>(608, 1333), (640, 1333),<br/>(672, 1333), (704, 1333),<br/>(736, 1333), (768, 1333),<br/>(800, 1333)], |  [(1000, 600),(1333, 800),(1666, 1000)]
+#### Loss
+
+- Cross Entropy Loss
+- Weighted Cross Entropy Loss
+- Dice Loss + Cross Entropy Loss
+- Lovasz Loss
+- Lovasz Loss + Cross Entropy Loss
+- ReduceLROnPlateau Scheduler
 
 <br/>
 
-#### NMS
-(non-maximum suppression)
+#### SWA Scheduler
 
-| nms_score_thr                 | iou_threshold     | F-mAP 
-|------------------------|:---------:|:---------:
-| 0.00    |  0.40    | 0.4481(채택)    
-| 0.04    |  0.50    | 0.4373  
-| 0.06    |  0.50    | 0.4351    
-| 0.00    |  0.40    | 0.4481    
-| 0.00    |  0.35    | 0.4462
+- Cross Entropy Loss
+- Weighted Cross Entropy Loss
+- Dice Loss + Cross Entropy Loss
+- Lovasz Loss
+- Lovasz Loss + Cross Entropy Loss
+- ReduceLROnPlateau Scheduler
+
+<br/>
+
+#### Modeling
+
+| Method                 | mAP       |
+|------------------------|:---------:|
+| GSCNN            |  0.43 
+| EfficientNet b5             |  0.44    |
+| EfficientNet b0           |  0.4805
+| EfficientNet b4           |  0.4848    
+| EfficientNet b7               |  0.49    
+| RegNetY 320                |  0.5336 
+| FCN8s            |  0.54    
+| TransUNet            |  0.5445    
+| HR+OCR Net           |   0.5453    
+| augmented + UniverseNet + multi scale train            |  0.5820    
+
+<br/>
+
+#### TTA
+
+- Cross Entropy Loss
+- Weighted Cross Entropy Loss
+- Dice Loss + Cross Entropy Loss
+- Lovasz Loss
+- Lovasz Loss + Cross Entropy Loss
+- ReduceLROnPlateau Scheduler
+
+<br/>
+
+#### MultiScale
+
+- Cross Entropy Loss
+- Weighted Cross Entropy Loss
+- Dice Loss + Cross Entropy Loss
+- Lovasz Loss
+- Lovasz Loss + Cross Entropy Loss
+- ReduceLROnPlateau Scheduler
+
+<br/>
+
+#### Softmax Temperature
+
+- Cross Entropy Loss
+- Weighted Cross Entropy Loss
+- Dice Loss + Cross Entropy Loss
+- Lovasz Loss
+- Lovasz Loss + Cross Entropy Loss
+- ReduceLROnPlateau Scheduler
 
 <br/>
 
