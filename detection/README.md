@@ -78,10 +78,10 @@ bash scripts/colorization.sh
 bash scripts/stylize.sh
 ```
 #### SWA
-```
-bash scripts/colorization.sh
-bash scripts/stylize.sh
-```
+- generalization에 강하여 test 셋에서 훨씬 좋은 성능을 보인다.
+- Faster-Rcnn LB 기준 0.02AP 증가
+- SWA를 mmdetection에 적용하기 쉽게 만들어진 opensource를 참고 : [Link](https://github.com/hyz-xmaster/swa_object_detection)
+
 #### Multiscale
 ```
 bash scripts/colorization.sh
@@ -104,14 +104,14 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 
 Hardware:
 - CPU: Xeon Gold 5120
-- GPU: 2080Ti or 1080Ti
-- Mem: > 64GB
-- Data is stored in SSD.
+- GPU: Tesla V100, P40
+- Mem: > 90GB
+- Data is stored in remote server stroage.
 
 Software:
-- System: Ubuntu 16.04.6 with Linux 4.4.0 kernel.
-- Python: 3.6 or 3.7 distributed by Anaconda.
-- CUDA: 10.0
+- System: Ubuntu 18.04.4 LTS with Linux 4.4.0-210-generic kernel.
+- Python: 3.7 distributed by Anaconda.
+- CUDA: 10.1
 
 <br/><br/>
 
