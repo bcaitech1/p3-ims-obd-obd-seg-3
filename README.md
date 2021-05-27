@@ -16,13 +16,9 @@
 
 <br/><br/>
 
-## [🗝세그멘테이션 대회]
+## [🗝세그멘테이션 대회](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/segmentation)
 
-[LINK](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/segmentation)
-
-## [🗝detection competition]
-
-[LINK](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/detection)
+## [🗝detection competition](https://github.com/joielee09/p3-ims-obd-obd-seg-4/tree/master/detection)
 
 <br/><br/>
 
