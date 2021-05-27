@@ -5,8 +5,6 @@
 (Public) 0.6051, 4등 
 (Private) 0.4741, 7등
 
-<br/><br/>
-
 # 목차 
 
 - [File Structure](#file-structure)
@@ -37,15 +35,27 @@
 
 ## Simple Use
 
-### Requirements
+### Install Requirements
 
-### Install packages
+```
+cd ./MainModel/
+pip install -r requirements.txt
+```
+
+✨apex should be installed for swin model
+```
+cd ./SwinModel/
+pip install -r requirements.txt
+```
 
 ### Train
+Run each model's ipynb train file
 
 ### Inference
+Run each model's ipynb inference file
 
 <br/><br/>
+
 ## File Structure  
   
 ```
@@ -56,13 +66,19 @@
 │   ├── mmdet
 │   ├── requirements
 │   ├── faster_rcnn_train.ipynb
+│   ├── faster_rcnn_inference.ipynb
 │   ├── faster_rcnn_train_kfold.ipynb
 │   ├── faster_rcnn_train_mosaic.ipynb
 │   ├── faster_rcnn_train_ensemble.ipynb
 │   ├── faster_rcnn_train_psuedo.ipynb
 │   ├── gflv2_train.ipynb
+│   ├── gflv2_inference.ipynb
 │   ├── universenet_train.ipynb
+│   ├── universenet_inference.ipynb
 │   ├── vfnet_train.ipynb
+│   ├── vfnet_inference.ipynb
+│   ├── detectoRS_train.ipynb
+│   ├── detectoRS_inference.ipynb
 │   └── requirements
 │
 ├── SwinModel
