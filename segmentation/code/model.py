@@ -1,10 +1,8 @@
 import torch.nn as nn
-import torch.optim as optim
-from torchvision import models
 from torchvision.models import vgg16
 import segmentation_models_pytorch as smp
-from TransUNet.networks.vit_seg_modeling import VisionTransformer as ViT_seg
-from TransUNet.networks.vit_seg_modeling import CONFIGS as CONFIGS_ViT_seg
+from segmentation.TransUNet.networks.vit_seg_modeling import VisionTransformer as ViT_seg
+from segmentation.TransUNet.networks.vit_seg_modeling import CONFIGS as CONFIGS_ViT_seg
 import numpy as np
 
 class R50_ViT(nn.Module):
