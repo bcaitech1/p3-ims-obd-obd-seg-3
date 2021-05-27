@@ -17,9 +17,10 @@
   - [Data](#data)
   - [Augmentation](#augmentation)
   - [Train](#train)
-  - [Loss](#loss)
+  - [Modeling](#modeling)
   - [SWA](#SWA)
-  - [Multiscale](#multiscale)
+  - [Set scale](#set-scale)
+  - [NMS](#nms)
   - [Ensemble](#ensemble)
 - [Results](#results)
   - [Model](#model)
@@ -137,15 +138,18 @@ Run each model's ipynb inference file
 - Challenge set : train size (512, 512), test size (512, 512)
 - (512, 512) size를 통해 train, test를 진행하는 것 보다 논문에서 사용한 scale을 따라 진행하는 것이 더 좋은 결과가 나왔다.
 <br/>
+
 | Model                  | Train Scale | Test Scale     
 |------------------------|:---------:|:---------:
 | GFLv2                  |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
 | UniverseNet            |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
 | VFNet                  |    [(1333,960), (1333,480)]       |   [1333,800],[1333,900],[1333,1000]
 | Swin-s                 |      [(480, 1333), (512, 1333),<br/>(544, 1333), (576, 1333),<br/>(608, 1333), (640, 1333),<br/>(672, 1333), (704, 1333),<br/>(736, 1333), (768, 1333),<br/>(800, 1333)], |  [(1000, 600),(1333, 800),(1666, 1000)]
+
 <br/>
 
-#### NMS(non-maximum suppression)
+#### NMS
+(non-maximum suppression)
 
 | nms_score_thr                 | iou_threshold     | F-mAP 
 |------------------------|:---------:|:---------:
@@ -164,9 +168,6 @@ Run each model's ipynb inference file
 |  GFLv2, VFNe, UniversNnet   |    0.5:0.5:0.5   |  0.6048 |         
 |  GFLv2, VFNet, UniverseNet Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
 
-<br/>
-
-#### Submission preparing
 
 <br/><br/>
 
