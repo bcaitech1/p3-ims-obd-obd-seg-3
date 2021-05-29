@@ -163,12 +163,22 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 
 <br/>
 
-#### TTA
+#### TTA(Augmentation)
+- Horizontal Flip
+- Random Brightness contrast
 
 
 <br/>
+#### TTA(MultiScale)
 
-#### MultiScale
+| Scale                |   weight      |    mAP    |
+|-----------------------|:-------------:|:---------:|
+|  Single Scale(512)   |    1   |  0.6121 |         
+|  3 Multi Scale(256, 512, 1024)   | 0.3:0.3:0.3 | 0.6337 |
+|  3 Multi Scale(256, 512, 1024)   | 0.3:0.4:0.3 | 0.6342 |
+|  3 Multi Scale(256, 512, 1024)   | 0.3:0.5:0.3 | 0.6318 |
+|  5 Multi Scale(128, 256, 512, 768, 1024)   | 0.2:0.2:0.2:0.2:0.2 | 0.6213 |
+|  5 Multi Scale(128, 256, 512, 768, 1024)   | 0.15:0.2:0.3:0.2:0.15 | 0.6219 |
 
 
 <br/>
