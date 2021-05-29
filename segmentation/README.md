@@ -121,16 +121,6 @@ Run each model's ipynb inference file
 
 <br/>
 
-#### kfold
-KFold(5 fold)
-
-![kfold](https://static.packt-cdn.com/products/9781789617740/graphics/b04c27c5-7e3f-428a-9aa6-bb3ebcd3584c.png)
-
-KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation에 사용하는 기법으로 주어진 데이터 전체를 사용할 수 있다. 특히 이번 대회와 같이 데이터가 부족한 경우 도움이 된다. 이미지와 클래스 별 annotation이 5개의 폴드에 골고루 들어가도록 했는데, 이미지마다 들어있는 annotation의 갯수가 다를 수 있기 때문에 최대한 공평하게 데이터를 나누는 부분에 어려움이 있었다. 5 fold로 나눈 이유는 데이터가 가장 적은 Battery를 기준으로 5개의  fold에 이미지와 함께 annotation을 가장 골고루 나눌 수 있는 수치가 5라고 판단하였기 때문이다.
-
-<br/>
-
-
 #### Loss
 
 - Cross Entropy Loss
