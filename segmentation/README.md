@@ -125,6 +125,7 @@ python inference.py\
 #### SWA Scheduler
 train 학습이 더 이상 되지 않았던 18epoch ~ 20epoch SWA optimizer를 사용하여 test error 최소로 weight가 되도록 적용하였다.
 실제 SWA 적용 결과 Leader board score 하락하여 최종 모델에는 적용하지 않았다.
+
 <br/>
 
 #### Modeling
