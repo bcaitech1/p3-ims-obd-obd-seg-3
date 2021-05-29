@@ -236,25 +236,31 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 
 ## Reference/ Citation
 
-[1] [HR+OCR Net] <br/>
+[1] HR+OCRNet <br/>
+```latex
 @misc{mmseg2020,
     title={{MMSegmentation}: OpenMMLab Semantic Segmentation Toolbox and Benchmark},
     author={MMSegmentation Contributors},
     howpublished = {\url{https://github.com/open-mmlab/mmsegmentation}},
     year={2020}
 }
-}<br/>
+```
 [2] [GSCNN](https://github.com/nv-tlabs/GSCNN/)<br/>
+```
 @article{takikawa2019gated,
   title={Gated-SCNN: Gated Shape CNNs for Semantic Segmentation},
   author={Takikawa, Towaki and Acuna, David and Jampani, Varun and Fidler, Sanja},
   journal={ICCV},
   year={2019}
 }
+```
 [3] [TransUNet](https://github.com/Beckschen/TransUNet)<br/>
+```bibtex
 @article{chen2021transunet,
   title={TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation},
   author={Chen, Jieneng and Lu, Yongyi and Yu, Qihang and Luo, Xiangde and Adeli, Ehsan and Wang, Yan and Lu, Le and Yuille, Alan L., and Zhou, Yuyin},
   journal={arXiv preprint arXiv:2102.04306},
   year={2021}
 }
+```
+<br/>
