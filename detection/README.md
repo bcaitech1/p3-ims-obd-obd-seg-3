@@ -165,8 +165,8 @@ Run each model's ipynb inference file
 
 | Method                |    model weight      |    mAP    |
 |-----------------------|:-------------:|:---------:|
-|  GFLv2, VFNe, UniversNnet   |    0.5:0.5:0.5   |  0.6048 |         
-|  GFLv2, VFNet, UniverseNet Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
+|  GFLv2, VFNe, UniverseNet   |    0.5:0.5:0.5   |  0.6048 |         
+|  GFLv2, VFNet, UniverseNet, Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
 
 
 <br/><br/>
