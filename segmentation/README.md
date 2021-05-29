@@ -14,7 +14,7 @@
   - [Install packages](#install-packages)
   - [Train](#train)
   - [Inference](#inference)
-- [pipeline](#pipeline)
+- [Pipeline](#pipeline)
   - [Data](#data)
   - [Augmentation](#augmentation)
   - [Train](#train)
@@ -88,7 +88,7 @@ python inference.py\
 
 <br/><br/>
 
-# pipeline
+# Pipeline
 
 ![pipeline](https://github.com/bcaitech1/p3-ims-obd-obd-seg-3/blob/master/detection/pipeline1.png)
 
@@ -132,10 +132,10 @@ train 학습이 더 이상 되지 않았던 18epoch ~ 20epoch SWA optimizer를 �
 | Model                  |   Backbone    |
 |------------------------|---------------|
 | GSCNN                   |  Wider_Resnet101
-| DeepLabV3Plus           |  EfficientNet b0
-| DeepLabV3Plus           |  EfficientNet b4    
-| DeepLabV3Plus           |  EfficientNet b5
-| DeepLabV3Plus           |  EfficientNet b7   
+| DeepLabV3Plus           |  EfficientNet B0
+| DeepLabV3Plus           |  EfficientNet B4    
+| DeepLabV3Plus           |  EfficientNet B5
+| DeepLabV3Plus           |  EfficientNet B7   
 | DeepLabV3Plus           |  RegNetY 320
 | Unet++                  |  InceptionResnetv2
 | Unet++                  |  InceptionV4
@@ -176,22 +176,22 @@ soft voting ensembel 효과를 극대화 하기위해 softmax Temperature를 적
 
 # Results
 
-#### ✨ Best performamce of each model
+#### ✨Final models
 
-| Model          | SWA | WS | GN | mAP       |
-|----------------|:---:|:--:|:--:|:---------:|
-| GFLv2          |     |    |    | 0.5706    |
-| VFNet r2 101   | O   | O  | O  | 0.5608    |
-| UniverseNet    |     |    |    | 0.5820    |
+| Model | Architecture          | Backbone | Loss |
+|------|----------------|-----|--------|
+|Model1| DeepLabV3Plus  | Efficientnet B5    | LovaszLoss + CrossEntropyLoss |
+|Model2| DeepLabV3Plus  | Efficientnet B5    | CrossEntropyLoss |
+|Model3| DeepLabV3Plus  | Efficientnet B4    | CrossEntropyLoss |
+|Model4| TransUnet      | ResnetV2 50        | CrossEntropyLoss |
 
 <br/>
 
 #### ✨ Ensemble
 
-| Method                            | Ensemble ratio       | mAP    |
-|-----------------------------------|----------------------|:------:|
-|  GFLv2, VFNet, UniverseNet        | 0.5, 0.5, 0.5        | 0.6048 |         
-|  GFLv2, VFNet, UniverseNet, Swin  | 0.5, 0.5, 0.5, 0.5   | 0.5993 |
+| Comb. | Weight | Public LB<br/>(mIoU) | Private LB<br/>(mIoU) |
+|:-----------------------------------:|:----------------------:|:------:|:------:| 
+|  Model1<br/>Model2<br/>Model3<br/>Model4  | 2.0<br/>2.0<br/>0.5<br/>1.0 | 0.6783 | 0.6574 |          
 
 <br/><br/>
 
