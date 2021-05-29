@@ -143,7 +143,8 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 <br/>
 
 #### SWA Scheduler
-
+train 학습이 더 이상 되지 않았던 18epoch ~ 20epoch SWA optimizer를 사용하여 test error 최소로 weight가 되도록 적용하였다.
+실제 SWA 적용 결과 Leader board score 하락하여 최종 모델에는 적용하지 않았다.
 <br/>
 
 #### Modeling
@@ -187,7 +188,8 @@ DeeplabV3+ Efficientnet-b5 20epoch 기준
 <br/>
 
 #### Softmax Temperature
-
+soft voting ensembel 효과를 극대화 하기위해 softmax Temperature를 적용하였다.
+최종 제출 시 Leader board score 하락(0.6783 -> 0.6765)하여 최종 모델에 적용하지 않았다.
 
 <br/>
 
