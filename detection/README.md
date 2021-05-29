@@ -179,11 +179,11 @@ Run each model's ipynb inference file
 
 #### ✨ Best performamce of each model
 
-| Model                 | SWA | WS | GN | mAP       | config  | pretrained |
-|-----------------------|:---:|:--:|:--:|:---------:|:-------:|:----------:|
-| augmented + GFLv2     |     |    |    | 0.5706    | config  | pretrained |
-| VFNet r2 101          | O   | O  | O  | 0.5608    | config  | pretrained |  
-| augmented + UniverseNet|    |    |    | 0.5820    | config  | pretrained | 
+| Model                 | SWA | WS | GN | mAP       |
+|-----------------------|:---:|:--:|:--:|:---------:|
+| augmented + GFLv2     |     |    |    | 0.5706    |
+| VFNet r2 101          | O   | O  | O  | 0.5608    |
+| augmented + UniverseNet|    |    |    | 0.5820    |
 
 <br/>
 
