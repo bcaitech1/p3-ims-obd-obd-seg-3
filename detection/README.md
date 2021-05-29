@@ -165,15 +165,15 @@ Run each model's ipynb inference file
 
 ✨best performamce of each model
 
-| Method                 | mAP       |  config  |  pretrained 
-|------------------------|:---------:|:--------:|:---------:
-| augmented + GFL v2 + multi scale train                |  0.5706    |  config   |  pretrained 
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   |  pretrained 
-| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  pretrained 
+| Method                 | mAP       |  config  | 
+|------------------------|:---------:|:--------:|
+| augmented + GFL v2 + multi scale train                |  0.5706    |  config   | 
+| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   | 
+| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  
 
 <br/>
 
-#### Ensemble
+✨Ensemble
 
 | Method                |    model weight      |    mAP    |
 |-----------------------|:-------------:|:---------:|
