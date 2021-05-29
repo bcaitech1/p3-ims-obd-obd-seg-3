@@ -159,6 +159,18 @@ Run each model's ipynb inference file
 | 0.00    |  0.40    | 0.4481    
 | 0.00    |  0.35    | 0.4462
 
+<br/><br/>
+
+# Results
+
+✨best performamce of each model
+
+| Method                 | mAP       |  config  |  pretrained 
+|------------------------|:---------:|:--------:|:---------:
+| augmented + GFL v2 + multi scale train                |  0.5706    |  config   |  pretrained 
+| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   |  pretrained 
+| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  pretrained 
+
 <br/>
 
 #### Ensemble
@@ -167,7 +179,6 @@ Run each model's ipynb inference file
 |-----------------------|:-------------:|:---------:|
 |  GFLv2, VFNe, UniverseNet   |    0.5:0.5:0.5   |  0.6048 |         
 |  GFLv2, VFNet, UniverseNet, Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
-
 
 <br/><br/>
 
@@ -185,19 +196,6 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 - System: Ubuntu 18.04.4 LTS with Linux 4.4.0-210-generic kernel.
 - Python: 3.7 distributed by Anaconda.
 - CUDA: 10.1
-
-<br/><br/>
-
-# Results
-
-✨best performamce of each model
-
-| Method                 | mAP       |  config  |  pretrained 
-|------------------------|:---------:|:--------:|:---------:
-| augmented + GFL v2 + multi scale train                |  0.5706    |  config   |  pretrained 
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   |  pretrained 
-| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  pretrained 
-
 
 <br/><br/>
 
