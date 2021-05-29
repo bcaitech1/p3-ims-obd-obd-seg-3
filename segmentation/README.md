@@ -204,7 +204,7 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 - CPU: Xeon Gold 5120
 - GPU: Tesla V100, P40
 - Mem: > 90GB
-- Data is stored in remote server stroage.
+- Data is stored in remote server storage.
 
 #### Software:
 - System: Ubuntu 18.04.4 LTS with Linux 4.4.0-210-generic kernel.
