@@ -124,18 +124,18 @@ Run each model's ipynb inference file
 
 #### Modeling
 
-| Method                 | mAP       |
-|------------------------|:---------:|
-| DETR            |  0.43 
-| Faster RCNN            |  0.44    |
-| Emprical Attention            |  0.4805
-| DetectoRS           |  0.4848    
-| augmented + GFL v2 + multi scale train                |  0.49    
-| vfnet r2 101 + multi scale train                 |  0.5336 
-| Swin-t(30 epoch)            |  0.54    
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5445    
-| vfnet r2 101 + multi scale train + SWA           |   0.5453    
-| augmented + UniverseNet + multi scale train            |  0.5820    
+| Model               | Multi Scale<br/>Train | SWA | WS | GN | mAP       |
+|------------------------|:---------:|:---------:|:---------:|:---------:|:---------:|
+| DETR            |  ||||0.4300| 
+| Faster RCNN         |  ||| |  0.4400    |
+| Emprical Attention |      |||     |  0.4805
+| DetectoRS         ||||  |  0.4848    
+| GFLv2        |O|||         |  0.4900    
+| Vfnet r2 101    |O|||              |  0.5336 
+| Swin-t          |O||||  0.5400    
+| Vfnet r2 101    |O|O|O|O |  0.5445    
+| Vfnet r2 101    |O|O| |  |   0.5453    
+| UniverseNet     |O| | |  | 0.5820    
 
 <br/>
 
