@@ -1,4 +1,4 @@
-# Detection Project for NAVER AI BoostCamp 
+# Segmentation Project for NAVER AI BoostCamp 
 
 ### 🏆Score & Standiing
 
@@ -108,6 +108,16 @@ Run each model's ipynb inference file
 <br/>
 
 #### Augmentation
+- CropNonEmptyMaskIFExists
+- GridDistortion
+- Flip
+- Resize
+- GridDropout
+- CoarseDropout
+- Superpixel
+- GridShuffle
+- Copy Blob from (https://hoya012.github.io/blog/segmentation_tutorial_pytorch/)
+- Cutmix
 
 <br/>
 
