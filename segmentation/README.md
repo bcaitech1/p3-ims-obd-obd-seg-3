@@ -38,24 +38,29 @@
 
 ## Simple Use
 
-### Install Requirements
-
-```
-cd ./MainModel/
-pip install -r requirements.txt
-```
-
-✨apex should be installed for swin model
-```
-cd ./SwinModel/
-pip install -r requirements.txt
-```
-
 ### Train
-Run each model's ipynb train file
+
+```
+python train.py --model 'ModelName'
+
+#example
+python train.py\
+--model DeepLapV3PlusEfficientnetB4NoisyStudent\
+--name effib4fold0\
+--criterion cross_entropy\
+--train train0.json\
+--val val0.json
+```
 
 ### Inference
-Run each model's ipynb inference file
+
+```
+#example
+python inference.py\
+--model DeepLapV3PlusEfficientnetB4NoisyStudent,DeepLapV3PlusEfficientnetB5NoisyStudent\
+--model_dir effib4fold0,effib5fold0\
+--weights 0.5,0.5
+```
 
 <br/><br/>
 
