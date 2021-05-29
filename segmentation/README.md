@@ -172,6 +172,8 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 
 #### TTA(MultiScale)
 
+DeeplabV3+ Efficientnet-b5 20epoch 기준
+
 | Scale                |   weight      |    mAP    |
 |-----------------------|:-------------:|:---------:|
 |  Single Scale(512)   |    1   |  0.6121 |         
