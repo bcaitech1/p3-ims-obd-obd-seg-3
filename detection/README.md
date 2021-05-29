@@ -108,6 +108,18 @@ Run each model's ipynb inference file
 
 #### Augmentation
 
+- Cutout
+- RandomBrightnessContrast
+- ImageCompression
+- ChannelShuffle
+- RGBShift
+- HueSaturationValue
+- RandomGamma
+- CLAHE
+- RandomRotate90
+- Blur : Blur, MedianBlur, MotionBlur, GaussNoise
+- Flip
+
 <br/>
 
 #### Modeling
@@ -128,6 +140,8 @@ Run each model's ipynb inference file
 <br/>
 
 #### SWA
+
+(Stochastic Weight Averaging)
 - Generalization에 강하여 test 셋에서 훨씬 좋은 성능을 보인다.</br>
 - SWA를 mmdetection에 적용하기 쉽게 만들어진 opensource를 참고 : [Link](https://github.com/hyz-xmaster/swa_object_detection)
 - Faster-Rcnn LB 기준 0.02 증가
@@ -149,7 +163,7 @@ Run each model's ipynb inference file
 <br/>
 
 #### NMS
-(non-maximum suppression)
+(Non-Maximum Suppression)
 
 | nms_score_thr                 | iou_threshold     | F-mAP 
 |------------------------|:---------:|:---------:
