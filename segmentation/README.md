@@ -186,17 +186,17 @@ soft voting ensembel 효과를 극대화 하기위해 softmax Temperature를 적
 
 # Results
 
-#### Best performamce of each model
+#### ✨ Best performamce of each model
 
-| Model          | SWA | WS | GN | mAP       | config  | pretrained |
-|----------------|:---:|:--:|:--:|:---------:|:-------:|:----------:|
-| GFLv2          |     |    |    | 0.5706    | config  | pretrained |
-| VFNet r2 101   | O   | O  | O  | 0.5608    | config  | pretrained |  
-| UniverseNet    |     |    |    | 0.5820    | config  | pretrained | 
+| Model          | SWA | WS | GN | mAP       |
+|----------------|:---:|:--:|:--:|:---------:|
+| GFLv2          |     |    |    | 0.5706    |
+| VFNet r2 101   | O   | O  | O  | 0.5608    |
+| UniverseNet    |     |    |    | 0.5820    |
 
 <br/>
 
-#### Ensemble
+#### ✨ Ensemble
 
 | Method                            | Ensemble ratio       | mAP    |
 |-----------------------------------|----------------------|:------:|
