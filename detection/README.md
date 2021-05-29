@@ -130,18 +130,16 @@ Run each model's ipynb inference file
 | Faster RCNN         |  ||| |  0.4400    |
 | Emprical Attention |      |||     |  0.4805
 | DetectoRS         ||||  |  0.4848    
-| GFLv2        |O|||         |  0.4900    
-| Vfnet r2 101    |O|||              |  0.5336 
-| Swin-t          |O||||  0.5400    
-| Vfnet r2 101    |O|O|O|O |  0.5445    
-| Vfnet r2 101    |O|O| |  |   0.5453    
-| UniverseNet     |O| | |  | 0.5820    
+| GFLv2        |✔|||         |  0.4900    
+| Vfnet r2 101    |✔|||              |  0.5336 
+| Swin-t          |✔||||  0.5400    
+| Vfnet r2 101    |✔|✔|✔|✔ |  0.5445    
+| Vfnet r2 101    |✔|✔| |  |   0.5453    
+| UniverseNet     |✔| | |  | 0.5820    
 
 <br/>
 
-#### SWA
-
-(Stochastic Weight Averaging)
+#### SWA (Stochastic Weight Averaging)
 - Generalization에 강하여 test 셋에서 훨씬 좋은 성능을 보인다.</br>
 - SWA를 mmdetection에 적용하기 쉽게 만들어진 opensource를 참고 : [Link](https://github.com/hyz-xmaster/swa_object_detection)
 - Faster-Rcnn LB 기준 0.02 증가
@@ -162,16 +160,15 @@ Run each model's ipynb inference file
 
 <br/>
 
-#### NMS
-(Non-Maximum Suppression)
+#### NMS (Non-Maximum Suppression)
 
 | nms_score_thr                 | iou_threshold     | F-mAP 
-|------------------------|:---------:|:---------:
-| 0.00    |  0.40    | 0.4481(채택)    
+|:--------------:|:---------:|:---------:
+| 0.00    |  0.35    | 0.4462
+|  _**0.00**_    |  _**0.40**_    | _**0.4481**_
 | 0.04    |  0.50    | 0.4373  
 | 0.06    |  0.50    | 0.4351    
-| 0.00    |  0.40    | 0.4481    
-| 0.00    |  0.35    | 0.4462
+ 
 
 <br/><br/>
 
@@ -182,7 +179,7 @@ Run each model's ipynb inference file
 | Model                 | SWA | WS | GN | mAP       |
 |-----------------------|:---:|:--:|:--:|:---------:|
 | augmented + GFLv2     |     |    |    | 0.5706    |
-| VFNet r2 101          | O   | O  | O  | 0.5608    |
+| VFNet r2 101          | ✔ | ✔  | ✔  | 0.5608    |
 | augmented + UniverseNet|    |    |    | 0.5820    |
 
 <br/>
