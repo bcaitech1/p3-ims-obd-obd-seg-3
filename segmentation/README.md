@@ -63,21 +63,21 @@ Run each model's ipynb inference file
   
 ```
 /
-├─ TransUNet
-├─ code
-│  ├─ dataset.py
-│  ├─ EDA.ipynb
-│  ├─ inference.py
-│  ├─ loss.py
-│  ├─ model.py
-│  ├─ train.py
-│  └─ utils.py
-├─ discussion
-├─ input
-├─ kfold_dataset
-├─ model
-├─ submission
-└─ README.md
+├── TransUNet
+├── code
+│  ├── dataset.py
+│  ├── EDA.ipynb
+│  ├── inference.py
+│  ├── loss.py
+│  ├── model.py
+│  ├── train.py
+│  └── utils.py
+├── discussion
+├── input
+├── kfold_dataset
+├── model
+├── submission
+└── README.md
 
 ```
 
