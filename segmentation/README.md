@@ -141,17 +141,17 @@ train 학습이 더 이상 되지 않았던 18epoch ~ 20epoch SWA optimizer를 �
 
 | Model                  |   Backbone    |
 |------------------------|---------------|
-| GSCNN                   |  wider_resnet101
+| GSCNN                   |  Wider_Resnet101
 | DeepLabV3Plus           |  EfficientNet b0
 | DeepLabV3Plus           |  EfficientNet b4    
 | DeepLabV3Plus           |  EfficientNet b5
 | DeepLabV3Plus           |  EfficientNet b7   
 | DeepLabV3Plus           |  RegNetY 320
-| Unet++                  |  inceptionresnetv2
-| Unet++                  |  inceptionv4
-| FCN8s                   |  vgg16
-| TransUNet               |  resnetV2 50
-| HR+OCR Net              |  HR Net 
+| Unet++                  |  InceptionResnetv2
+| Unet++                  |  InceptionV4
+| FCN8s                   |  Vgg16
+| TransUNet               |  ResnetV2 50
+| HR+OCR Net              |  HRNet 
 
 <br/>
 
