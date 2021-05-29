@@ -202,6 +202,7 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 ## Reference/ Citation
 
 [1] mmdetection <br/>
+```
 @article{mmdetection,
   title   = {{MMDetection}: Open MMLab Detection Toolbox and Benchmark},
   author  = {Chen, Kai and Wang, Jiaqi and Pang, Jiangmiao and Cao, Yuhang and
@@ -212,7 +213,9 @@ We trained models on our lab's Linux cluster. The environment listed below refle
              and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
   journal= {arXiv preprint arXiv:1906.07155},
   year={2019}
-}<br/>
+}
+```
+<br/>
 [2] [GFL v2 & UniverseNet](https://github.com/shinya7y/UniverseNet)<br/>
 [3] [VFNET](https://github.com/hyz-xmaster/VarifocalNet)<br/>
 [4] [DetectoRS](https://github.com/joe-siyuan-qiao/DetectoRS)<br/>
