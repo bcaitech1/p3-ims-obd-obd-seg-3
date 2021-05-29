@@ -154,10 +154,10 @@ Run each model's ipynb inference file
 <br/>
 
 | Model                  | Train Scale | Test Scale     
-|------------------------|:---------:|:---------:
-| GFLv2                  |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
-| UniverseNet            |    [(1333,960), (1333,480)]       |   [1333,960],[1333,800],[1333,480]  
-| VFNet                  |    [(1333,960), (1333,480)]       |   [1333,800],[1333,900],[1333,1000]
+|------------------------|:-----------:|:-----------:
+| GFLv2                  |    [(1333,960), (1333,480)]       |   [(1333,960),(1333,800),(1333,480)]
+| UniverseNet            |    [(1333,960), (1333,480)]       |   [(1333,960),(1333,800),(1333,480)]
+| VFNet                  |    [(1333,960), (1333,480)]       |   [(1333,800),(1333,900),(1333,1000)]
 | Swin-s                 |      [(480, 1333), (512, 1333),<br/>(544, 1333), (576, 1333),<br/>(608, 1333), (640, 1333),<br/>(672, 1333), (704, 1333),<br/>(736, 1333), (768, 1333),<br/>(800, 1333)], |  [(1000, 600),(1333, 800),(1666, 1000)]
 
 <br/>
@@ -177,22 +177,22 @@ Run each model's ipynb inference file
 
 # Results
 
-✨best performamce of each model
+#### ✨ Best performamce of each model
 
-| Method                 | mAP       |  config  | 
-|------------------------|:---------:|:--------:|
-| augmented + GFL v2 + multi scale train                |  0.5706    |  config   | 
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   | 
-| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  
+| Model                 | SWA | WS | GN | mAP       | config  | pretrained |
+|-----------------------|:---:|:--:|:--:|:---------:|:-------:|:----------:|
+| augmented + GFLv2     |     |    |    | 0.5706    | config  | pretrained |
+| VFNet r2 101          | O   | O  | O  | 0.5608    | config  | pretrained |  
+| augmented + UniverseNet|    |    |    | 0.5820    | config  | pretrained | 
 
 <br/>
 
-✨Ensemble
+#### ✨ Ensemble
 
-| Method                |    model weight      |    mAP    |
-|-----------------------|:-------------:|:---------:|
-|  GFLv2, VFNe, UniverseNet   |    0.5:0.5:0.5   |  0.6048 |         
-|  GFLv2, VFNet, UniverseNet, Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
+| Method                            | Ensemble ratio       | mAP    |
+|-----------------------------------|----------------------|:------:|
+|  GFLv2, VFNet, UniverseNet        | 0.5, 0.5, 0.5        | 0.6048 |         
+|  GFLv2, VFNet, UniverseNet, Swin  | 0.5, 0.5, 0.5, 0.5   | 0.5993 |
 
 <br/><br/>
 
