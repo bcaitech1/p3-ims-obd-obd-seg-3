@@ -92,7 +92,7 @@ Run each model's ipynb inference file
 │ 
 ├── README.md
 ├── pipeline.png
-├── __init__.py
+└── __init__.py
 ```
 
 <br/><br/>
