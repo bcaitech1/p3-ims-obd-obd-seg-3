@@ -149,18 +149,19 @@ train 학습이 더 이상 되지 않았던 18epoch ~ 20epoch SWA optimizer를 �
 
 #### Modeling
 
-| Method                 | mAP       |
-|------------------------|:---------:|
-| GSCNN            |  0.43 
-| EfficientNet b5             |  0.44    |
-| EfficientNet b0           |  0.4805
-| EfficientNet b4           |  0.4848    
-| EfficientNet b7               |  0.49    
-| RegNetY 320                |  0.5336 
-| FCN8s            |  0.54    
-| TransUNet            |  0.5445    
-| HR+OCR Net           |   0.5453    
-| augmented + UniverseNet + multi scale train            |  0.5820    
+| Model                  |   Backbone    |
+|------------------------|---------------|
+| GSCNN                   |  wider_resnet101
+| DeepLabV3Plus           |  EfficientNet b0
+| DeepLabV3Plus           |  EfficientNet b4    
+| DeepLabV3Plus           |  EfficientNet b5
+| DeepLabV3Plus           |  EfficientNet b7   
+| DeepLabV3Plus           |  RegNetY 320
+| Unet++                  |  inceptionresnetv2
+| Unet++                  |  inceptionv4
+| FCN8s                   |  vgg16
+| TransUNet               |  resnetV2 50
+| HR+OCR Net              |  HR Net 
 
 <br/>
 
@@ -235,16 +236,25 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 
 ## Reference/ Citation
 
-[1] mmdetection <br/>
-@article{mmdetection,
-  title   = {{MMDetection}: Open MMLab Detection Toolbox and Benchmark},
-  author  = {Chen, Kai and Wang, Jiaqi and Pang, Jiangmiao and Cao, Yuhang and
-             Xiong, Yu and Li, Xiaoxiao and Sun, Shuyang and Feng, Wansen and
-             Liu, Ziwei and Xu, Jiarui and Zhang, Zheng and Cheng, Dazhi and
-             Zhu, Chenchen and Cheng, Tianheng and Zhao, Qijie and Li, Buyu and
-             Lu, Xin and Zhu, Rui and Wu, Yue and Dai, Jifeng and Wang, Jingdong
-             and Shi, Jianping and Ouyang, Wanli and Loy, Chen Change and Lin, Dahua},
-  journal= {arXiv preprint arXiv:1906.07155},
-  year={2019}
+[1] [HR+OCR Net] <br/>
+@misc{mmseg2020,
+    title={{MMSegmentation}: OpenMMLab Semantic Segmentation Toolbox and Benchmark},
+    author={MMSegmentation Contributors},
+    howpublished = {\url{https://github.com/open-mmlab/mmsegmentation}},
+    year={2020}
+}
 }<br/>
-[2] [GFL v2 & UniverseNet](https://github.com/shinya7y/UniverseNet)<br/>
+[2] [GSCNN](https://github.com/nv-tlabs/GSCNN/)<br/>
+@article{takikawa2019gated,
+  title={Gated-SCNN: Gated Shape CNNs for Semantic Segmentation},
+  author={Takikawa, Towaki and Acuna, David and Jampani, Varun and Fidler, Sanja},
+  journal={ICCV},
+  year={2019}
+}
+[3] [TransUNet](https://github.com/Beckschen/TransUNet)<br/>
+@article{chen2021transunet,
+  title={TransUNet: Transformers Make Strong Encoders for Medical Image Segmentation},
+  author={Chen, Jieneng and Lu, Yongyi and Yu, Qihang and Luo, Xiangde and Adeli, Ehsan and Wang, Yan and Lu, Le and Yuille, Alan L., and Zhou, Yuyin},
+  journal={arXiv preprint arXiv:2102.04306},
+  year={2021}
+}
