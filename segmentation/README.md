@@ -169,6 +169,7 @@ KFold는 전체데이터를 k개 단위로 나눠 각각을 Train과 Validation�
 
 
 <br/>
+
 #### TTA(MultiScale)
 
 | Scale                |   weight      |    mAP    |
