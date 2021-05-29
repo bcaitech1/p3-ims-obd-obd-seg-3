@@ -182,15 +182,26 @@ DeeplabV3+ Efficientnet-b5 20epoch 기준
 soft voting ensembel 효과를 극대화 하기위해 softmax Temperature를 적용하였다.
 최종 제출 시 Leader board score 하락(0.6783 -> 0.6765)하여 최종 모델에 적용하지 않았다.
 
+<br/><br/>
+
+# Results
+
+#### Best performamce of each model
+
+| Model          | SWA | WS | GN | mAP       | config  | pretrained |
+|----------------|:---:|:--:|:--:|:---------:|:-------:|:----------:|
+| GFLv2          |     |    |    | 0.5706    | config  | pretrained |
+| VFNet r2 101   | O   | O  | O  | 0.5608    | config  | pretrained |  
+| UniverseNet    |     |    |    | 0.5820    | config  | pretrained | 
+
 <br/>
 
 #### Ensemble
 
-| Method                |    model weight      |    mAP    |
-|-----------------------|:-------------:|:---------:|
-|  GFLv2, VFNe, UniversNnet   |    0.5:0.5:0.5   |  0.6048 |         
-|  GFLv2, VFNet, UniverseNet Swin   | 0.5:0.5:0.5:0.5 | 0.5993 
-
+| Method                            | Ensemble ratio       | mAP    |
+|-----------------------------------|----------------------|:------:|
+|  GFLv2, VFNet, UniverseNet        | 0.5, 0.5, 0.5        | 0.6048 |         
+|  GFLv2, VFNet, UniverseNet, Swin  | 0.5, 0.5, 0.5, 0.5   | 0.5993 |
 
 <br/><br/>
 
@@ -208,19 +219,6 @@ We trained models on our lab's Linux cluster. The environment listed below refle
 - System: Ubuntu 18.04.4 LTS with Linux 4.4.0-210-generic kernel.
 - Python: 3.7 distributed by Anaconda.
 - CUDA: 10.1
-
-<br/><br/>
-
-# Results
-
-✨best performamce of each model
-
-| Method                 | mAP       |  config  |  pretrained 
-|------------------------|:---------:|:--------:|:---------:
-| augmented + GFL v2 + multi scale train                |  0.5706    |  config   |  pretrained 
-| vfnet r2 101 + multi scale train + SWA + WS + GN            |  0.5608    |  config   |  pretrained 
-| augmented + UniverseNet + multi scale train            |  0.5820    |  config   |  pretrained 
-
 
 <br/><br/>
 
